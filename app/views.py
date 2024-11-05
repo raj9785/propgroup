@@ -1,3 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
+def index(request):
+    context = {}
+    context['page_name'] = "home"
+    return render(request, 'front/home.html', context)
