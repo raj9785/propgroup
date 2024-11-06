@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'propgroup.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'propgroup_db',
         'USER': 'root',
         'PASSWORD': '',
@@ -84,7 +84,6 @@ DATABASES = {
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',  # Ensures full Unicode support
-           
         }
     }
 }

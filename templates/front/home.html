@@ -1,5 +1,100 @@
 {% extends "front/base.html" %}{% block content %} {% load static %}
-home
+<div id="map"></div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-La2DPp9RQKgHAlNqShJtgAvE5rPA6ME&callback=initMap"
+        async defer></script>
+<script>
+  function initMap() {
+    // Coordinates for the center of the city (Gurgaon)
+    var cityCenter = {lat: 28.4595, lng: 77.0266};
+
+    // Create the map, centered on the city
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 12,  // Adjust the zoom level
+      center: cityCenter,
+      disableDefaultUI: true,  // Disable map controls
+      restriction: {
+        latLngBounds: { 
+          north: 28.55476998927484,  // Northern boundary
+          south: 28.371787123082136, // Southern boundary
+          west: 76.94973515874823,   // Western boundary
+          east: 77.13974236261555    // Eastern boundary
+        },
+        strictBounds: true
+      }
+    });
+
+    // Define city boundary coordinates (for Gurgaon example)
+    var cityBoundaryCoords = [
+      { lat: 28.55476998927484, lng: 76.94973515874823 },  // NW
+      { lat: 28.55476998927484, lng: 77.13974236261555 },  // NE
+      { lat: 28.371787123082136, lng: 77.13974236261555 }, // SE
+      { lat: 28.371787123082136, lng: 76.94973515874823 }  // SW
+    ];
+
+    // Create a polygon to represent the city boundary
+    var cityBoundary = new google.maps.Polygon({
+      paths: cityBoundaryCoords,
+      strokeColor: '#FF0000',  // Boundary line color (red)
+      strokeOpacity: 0.8,  // Line opacity
+      strokeWeight: 2,  // Line thickness
+      //fillColor: '#FF0000',  // Fill color inside boundary
+      fillOpacity: 0.35  // Fill opacity
+    });
+
+    // Display the boundary polygon on the map
+    cityBoundary.setMap(map);
+
+    // Define boundary coordinates for Area 1
+    var area1Coords = [ 
+      { lat: 28.4209485409335, lng: 77.05193033864943 },
+      { lat: 28.406595622980205, lng: 77.05893364472941 },
+      { lat: 28.41224596258941, lng: 77.07416850035145 },
+      { lat: 28.41256336293718, lng: 77.07489284630462 },
+      { lat: 28.412880932280327, lng: 77.07445482047409 },
+      { lat: 28.412944529911876,  lng: 77.07365912193801 },
+      { lat: 28.41745310519037, lng: 77.06867870349575 },
+      { lat: 28.42641165558762, lng: 77.0570581768992 },
+      { lat: 28.42094872233723, lng: 77.05178589252087 },
+    ];
+
+    // Define boundary coordinates for Area 2
+    var area2Coords = [
+      { lat: 28.427976515580074, lng: 77.05814867707736 },
+      { lat: 28.43453857777402, lng: 77.04945078199844 },
+      { lat: 28.430695107047683, lng: 77.04512326630989},
+      { lat: 28.428471324645002, lng: 77.03688755280064},
+      { lat: 28.417193444384203,  lng: 77.04023299748876},
+      { lat: 28.42096539704198, lng: 77.05193438105618},
+      
+    ];
+
+    // Create polygon for Area 1
+    var area1 = new google.maps.Polygon({
+      paths: area1Coords,
+      strokeColor: '#FF0000',  // Red outline
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF0000',  // Red fill
+      fillOpacity: 0.35
+    });
+
+    // Create polygon for Area 2
+    var area2 = new google.maps.Polygon({
+      paths: area2Coords,
+      strokeColor: '#0000FF',  // Blue outline
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#0000FF',  // Blue fill
+      fillOpacity: 0.35
+    });
+
+    // Display the polygons on the map
+    area1.setMap(map);
+    area2.setMap(map);
+
+  }
+</script>
 
 
 {% endblock %}
