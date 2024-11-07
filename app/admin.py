@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import State,City
+from .models import State,City,Zone,ZoneBoundry
 
 def customTitledFilter(title):
     class Wrapper(admin.FieldListFilter):
@@ -32,3 +32,31 @@ class CityAdmin(admin.ModelAdmin):
     #     return False
 
 admin.site.register(City, CityAdmin)
+
+
+
+class ZoneAdmin(admin.ModelAdmin):
+    list_display = ('zone_name',"city",'state','is_active')
+    list_per_page = 25
+    
+    # def has_delete_permission(self, request, obj=None):
+    #     return False 
+    # def has_add_permission(self, request, obj=None):
+    #     return False
+
+admin.site.register(Zone, ZoneAdmin)
+
+
+
+class ZoneBoundryAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/app/zone_boundry/change_form.html'
+    add_form_template = 'admin/app/zone_boundry/add_form.html'
+    list_display = ('zone',"latitude",'longitude','sequence_number')
+    list_per_page = 25
+    
+    # def has_delete_permission(self, request, obj=None):
+    #     return False 
+    # def has_add_permission(self, request, obj=None):
+    #     return False
+
+admin.site.register(ZoneBoundry, ZoneBoundryAdmin)
