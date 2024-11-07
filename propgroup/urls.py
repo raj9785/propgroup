@@ -32,4 +32,6 @@ urlpatterns = [
     path('', views.index, name="index"),
     path('zone_list', views.zone_list,name="zone_list"),
     path('saveroute', views.saveroute,name="saveroute"),
+    path('location_list', views.location_list,name="location_list"),
+    path('savelocationboundry', views.savelocationboundry,name="savelocationboundry"),
 ]
