@@ -40,7 +40,7 @@
     ];
 
     // Fetch the GeoJSON file for Gurgaon boundary
-    fetch('static/front/gurgaon_boundary.geojson')  // Replace with the actual path to your GeoJSON file
+    fetch('static/front/gurgaon.geojson')  // Replace with the actual path to your GeoJSON file
       .then(response => response.json())
       .then(geojsonData => {
         // Extract coordinates of the Gurgaon boundary from GeoJSON data
@@ -56,15 +56,15 @@
           color: '#000',           // Border color for the mask
           weight: 0,               // No border weight
           fillColor: '#000',       // Fill color for the outside area
-          fillOpacity: 0.8         // Opacity of the outside area (adjust for fade out effect)
+          fillOpacity: 0.4       // Opacity of the outside area (adjust for fade out effect)
         }).addTo(map);
 // Add Gurgaon boundary with a different style for visibility
 var gurgaonGeoJSON = L.geoJSON(geojsonData, {
         style: function (feature) {
           return {
-            color: 'lightblue',
+            color: 'white',
             weight: 1,
-            fillColor: 'lightblue',
+            fillColor: 'white',
             fillOpacity: 0.2
           };
         }
