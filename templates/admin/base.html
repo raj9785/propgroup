@@ -1,0 +1,106 @@
+
+{% extends 'admin/base.html' %}{% load static %}
+{% block extrahead %}
+
+{{ block.super }}
+
+
+
+
+
+
+
+
+
+
+
+    
+
+  </script>
+  
+
+
+{% load static %}
+
+<!-- <style type="text/css">
+    /* Add custom styles for the logo */
+   #site-name a {
+        background: url("{% static 'admin/assets/logo.svg' %}") no-repeat center;
+        background-size: contain;
+        display: block;
+        width: 180px; /* Adjust the width as needed */
+        height: 50px; /* Adjust the height as needed */
+        text-indent: -9999px;
+    } 
+</style> -->
+<style>
+    /* VARIABLE DEFINITIONS */
+    :root {
+      --primary: #9A9A9A;
+      --secondary: #343A40;
+      --accent: #f5dd5d;
+      --primary-fg: #fff;
+    
+      --body-fg: #333;
+      --body-bg: #fff;
+      --body-quiet-color: #666;
+      --body-loud-color: #000;
+    
+      --header-color: #FFFFFF;
+      --header-branding-color: var(--accent);
+      --header-bg: var(--secondary);
+      --header-link-color: var(--primary-fg);
+    
+      --breadcrumbs-fg: #343A40;
+      --breadcrumbs-link-fg: var(--body-bg);
+      --breadcrumbs-bg: var(--primary);
+    
+      --link-fg: #343A40;
+      --link-hover-color: #9A9A9A;
+      --link-selected-fg: #5b80b2;
+    
+      --hairline-color: #e8e8e8;
+      --border-color: #ccc;
+    
+      --error-fg: #ba2121;
+    
+      --message-success-bg: #dfd;
+      --message-warning-bg: #ffc;
+      --message-error-bg: #ffefef;
+    
+      --darkened-bg: #f8f8f8; /* A bit darker than --body-bg */
+      --selected-bg: #e4e4e4; /* E.g. selected table cells */
+      --selected-row: #ffc;
+    
+      --button-fg: #fff;
+      --button-bg: var(--primary);
+      --button-hover-bg: #343A40;
+      --default-button-bg: var(--secondary);
+      --default-button-hover-bg: #333;
+      --close-button-bg: #9A9A9A; /* Previously #bbb, contrast 1.92 */
+      --close-button-hover-bg: var(--secondary);
+      --delete-button-bg: #ba2121;
+      --delete-button-hover-bg: #a41515;
+    
+      --object-tools-fg: var(--button-fg);
+      --object-tools-bg: var(--close-button-bg);
+      --object-tools-hover-bg: var(--close-button-hover-bg);
+    }
+    
+    
+    </style>
+    
+    {% endblock %}
+    
+    {% block branding %}
+    
+    <h1 id="site-name">
+      <a href="{% url 'admin:index' %}"></a>
+  </h1>
+
+ 
+   
+    {% endblock %}
+
+
+
