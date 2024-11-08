@@ -30,6 +30,7 @@ admin.site.index_title = "Welcome to Property Group Portal"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name="index"),
+    path('leafletjs', views.leafletjs, name="leafletjs"),
     path('zone_list', views.zone_list,name="zone_list"),
     path('saveroute', views.saveroute,name="saveroute"),
     path('location_list', views.location_list,name="location_list"),

@@ -3,13 +3,18 @@
 
 
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const windowHeight = window.innerHeight;
+    const div = document.getElementById('map');
+    div.style.height = `${window.innerHeight-20}px`;
+});
   function initMap() {
     // Coordinates for the center of the city (Gurgaon)
     var cityCenter = {lat: 28.4595, lng: 77.0266};
 
     // Create the map, centered on the city
     var map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 12,  // Adjust the zoom level
+      zoom: 5,  // Adjust the zoom level
       center: cityCenter,
       disableDefaultUI: true,  // Disable map controls
       restriction: {
@@ -38,7 +43,7 @@
       strokeOpacity: 0.8,  // Line opacity
       strokeWeight: 2,  // Line thickness
       //fillColor: '#FF0000',  // Fill color inside boundary
-      fillOpacity: 0.35  // Fill opacity
+      fillOpacity: 0  // Fill opacity
     });
 
     // Display the boundary polygon on the map

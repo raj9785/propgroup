@@ -5,7 +5,12 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 def index(request):
     context = {}
     context['page_name'] = "home"
-    return render(request, 'front/home.html', context)
+    return render(request, 'front/leafletjs.html', context)
+
+def leafletjs(request):
+    context = {}
+    context['page_name'] = "home"
+    return render(request, 'front/leafletjs.html', context)
 
 
 def zone_list(request):

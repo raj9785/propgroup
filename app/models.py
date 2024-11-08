@@ -1,4 +1,36 @@
 from django.db import models
+from django.contrib.auth.models import User
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        User,
+        verbose_name="user",
+        on_delete=models.CASCADE,
+        related_name='user_profile'
+    )
+
+    mobile = models.CharField(max_length=10, blank=False, null=True)
+    POSSITION = [
+        ('1', 'Buyer'),
+        ('2', 'Seller'),
+        ('3', 'Sub-Admin'),
+        ('4', 'Admin'),
+    ]
+    user_type = models.CharField(
+        max_length=1, null=True, blank=False, choices=POSSITION)
+    
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "User Profile"
+        verbose_name_plural = "User Profile List"
+
+    def __str__(self):
+        return self.user.username
+
 
 class State(models.Model):
     state_name = models.CharField(max_length=50,unique=True, null=True, blank=False)
