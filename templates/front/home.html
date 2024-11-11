@@ -129,12 +129,12 @@
      // Custom HTML for the Info Window content
      var infoContent = `
       <div class="custom-info-window">
-        <h3>{{ zone.zone_name }}</h3>
-        <p>This zone is designated with color code {{ zone.zone_color_code }}.</p>
+        <h3>{{ zone_data.zone_name }}</h3>
+        <p>This zone is designated with color code {{ zone_data.zone_color_code }}.</p>
          <div class="video-container">
           <iframe width="200" height="113" src="https://www.youtube.com/embed/SvgDzaIoBxY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
-        <button onclick="alert('More info for {{ zone.zone_name }}')">More Info</button>
+        <button onclick="alert('More info for {{ zone_data.zone_name }}')">More Info</button>
       </div>
     `;
 
@@ -147,10 +147,10 @@
     });
 
     var additionalMarkers = [
-      { lat: polygonCenter.lat + 0.01, lng: polygonCenter.lng + 0.01, label: "A" },
-      { lat: polygonCenter.lat - 0.01, lng: polygonCenter.lng - 0.01, label: "B" },
-      { lat: polygonCenter.lat + 0.01, lng: polygonCenter.lng - 0.01, label: "C" },
-      { lat: polygonCenter.lat - 0.01, lng: polygonCenter.lng + 0.01, label: "D" }
+      { lat: 28.434320575598562, lng: 77.01516097882633, label: "Hero MotoCorp" },
+      { lat: 28.404438694364607, lng: 77.00272179892329, label: "American Express" },
+      { lat: 28.40200420181406, lng: 76.98938981407711, label: "Haldiram's - Kherki Daula" },
+      { lat: 28.405784110959946, lng: 77.04144714320837, label: "Park View City 1" }
     ];
 
     // Add each additional marker with a click event
@@ -159,21 +159,41 @@
         position: { lat: markerData.lat, lng: markerData.lng },
         map: map,
         title: '{{ zone_data.zone_name }} - ' + markerData.label,
-        label: markerData.label,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 5,
-          fillColor: 'blue',
-          fillOpacity: 1,
-          strokeColor: 'white',
-          strokeWeight: 1
-        }
+
+        //label: markerData.label,
+        // icon: {
+        //   path: google.maps.SymbolPath.CIRCLE,
+        //   scale: 5,
+        //   fillColor: 'blue',
+        //   fillOpacity: 1,
+        //   strokeColor: 'white',
+        //   strokeWeight: 1
+        // }
       });
 
-      // Add click event to each additional marker
-      additionalMarker.addListener('click', function() {
-        alert("Marker " + markerData.label + " in Zone: {{ zone_data.zone_name }} clicked!");
-      });
+      
+      
+
+
+      var infoContentAdm = `
+      <div class="custom-info-window">
+        <h3>{{ zone_data.zone_name }}</h3>
+        <p>This zone is designated with color code {{ zone.zone_color_code }}.</p>
+        <div><strong>{{ zone_data.zone_name }}</strong><br>Marker ${markerData.label}</div>
+         
+        
+      </div>
+    `;
+
+    var centerInfoWindowAdm = new google.maps.InfoWindow({
+      content: infoContentAdm
+    });
+
+    additionalMarker.addListener('click', function() {
+      centerInfoWindowAdm.open(map, additionalMarker);
+    });
+
+
     });
    
 
