@@ -1,4 +1,13 @@
 {% extends "front/base.html" %}{% block content %} {% load static %}
+<!-- Compass Control Positioned at the Top of the Page with N, E, S, W -->
+<div class="fixed-compass">
+  <div class="compass-direction north">N</div>
+  <div class="compass-direction east">E</div>
+  <div class="compass-direction south">S</div>
+  <div class="compass-direction west">W</div>
+  <div class="compass-inner" id="compass">•</div> <!-- Inner circle for rotation -->
+</div>
+
 <div id="map" style="height: 600px;"></div>
 
 
@@ -24,7 +33,6 @@
       minZoom: 11,           // Minimum zoom level allowed
       maxZoom: 20,          // Maximum zoom level allowed
       center: cityCenter,
-
       zoomControl: true,      // Enable zoom control buttons
       //draggable: false,      // Disable map dragging (panning)
       //gestureHandling: 'none', // Disable zoom by mouse wheel or gesture
@@ -57,25 +65,128 @@
       fillOpacity: 0.35        // Fill opacity
     });
 
+    // Add event listener to the GeoJSON data layer (if you need to handle it separately)
+    map.data.addListener('click', function (event) {
+      var clickedLat = event.latLng.lat();
+      var clickedLng = event.latLng.lng();
+      console.log("GeoJSON clicked at:", { lat: clickedLat, lng: clickedLng });
+    });
+
+
+    {%if zone_list %}
+    {% for zone_data in zone_list %}
+    
+
     var polygonCoords = [
-            {lat: 28.4850, lng: 77.0000},
-            {lat: 28.4850, lng: 77.0500},
-            {lat: 28.4350, lng: 77.0500},
-            {lat: 28.4350, lng: 77.0000}
-        ];
+      {% for boundary in zone_data.zones.all %}
+        { lat: {{ boundary.latitude }}, lng: {{ boundary.longitude }} },
+      {% endfor %}
+    ];
 
-        // Create a polygon and add it to the map
-        var polygon = new google.maps.Polygon({
-            paths: polygonCoords,  // Define the polygon's coordinates
-            strokeColor: '#FFFFFF',  // Outer boundary color (white)
-            strokeOpacity: 0.8,      // Line opacity
-            strokeWeight: 2,         // Line thickness
-            fillColor: '#FF0000',    // Fill color inside polygon (red)
-            fillOpacity: 0.35        // Fill opacity
-        });
+    var polygon = new google.maps.Polygon({
+      paths: polygonCoords,
+      strokeColor: '{{ zone_data.zone_color_code }}',  // Ensure zone color is a valid code
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '{{ zone_data.zone_color_code }}',    // Ensure zone color is a valid code
+      fillOpacity: 0.35,
+      clickable: true  // Ensure the polygon is clickable
+    });
+    // Display the polygon on the map
+    polygon.setMap(map);
 
-        // Display the polygon on the map
-        polygon.setMap(map);
+    // Calculate the center of the polygon
+    function getPolygonCenter(coords) {
+      var latSum = 0;
+      var lngSum = 0;
+      coords.forEach(function(coord) {
+        latSum += coord.lat;
+        lngSum += coord.lng;
+      });
+      return {
+        lat: latSum / coords.length,
+        lng: lngSum / coords.length
+      };
+    }
+
+    var polygonCenter = getPolygonCenter(polygonCoords);
+
+    // Create a marker at the center with the zone name
+    var centerMarker = new google.maps.Marker({
+      position: polygonCenter,
+      map: map,
+      title: '{{ zone_data.zone_name }}',  // This displays the zone name on hover
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,  // Size of the marker icon
+        fillColor: '{{ zone_data.zone_color_code }}',
+        fillOpacity: 1,
+        strokeColor: 'white',
+        strokeWeight: 2
+      }
+    });
+
+     // Custom HTML for the Info Window content
+     var infoContent = `
+      <div class="custom-info-window">
+        <h3>{{ zone.zone_name }}</h3>
+        <p>This zone is designated with color code {{ zone.zone_color_code }}.</p>
+         <div class="video-container">
+          <iframe width="200" height="113" src="https://www.youtube.com/embed/SvgDzaIoBxY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <button onclick="alert('More info for {{ zone.zone_name }}')">More Info</button>
+      </div>
+    `;
+
+    var centerInfoWindow = new google.maps.InfoWindow({
+      content: infoContent
+    });
+
+    centerMarker.addListener('click', function() {
+      centerInfoWindow.open(map, centerMarker);
+    });
+
+    var additionalMarkers = [
+      { lat: polygonCenter.lat + 0.01, lng: polygonCenter.lng + 0.01, label: "A" },
+      { lat: polygonCenter.lat - 0.01, lng: polygonCenter.lng - 0.01, label: "B" },
+      { lat: polygonCenter.lat + 0.01, lng: polygonCenter.lng - 0.01, label: "C" },
+      { lat: polygonCenter.lat - 0.01, lng: polygonCenter.lng + 0.01, label: "D" }
+    ];
+
+    // Add each additional marker with a click event
+    additionalMarkers.forEach(function(markerData) {
+      var additionalMarker = new google.maps.Marker({
+        position: { lat: markerData.lat, lng: markerData.lng },
+        map: map,
+        title: '{{ zone_data.zone_name }} - ' + markerData.label,
+        label: markerData.label,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 5,
+          fillColor: 'blue',
+          fillOpacity: 1,
+          strokeColor: 'white',
+          strokeWeight: 1
+        }
+      });
+
+      // Add click event to each additional marker
+      additionalMarker.addListener('click', function() {
+        alert("Marker " + markerData.label + " in Zone: {{ zone_data.zone_name }} clicked!");
+      });
+    });
+   
+
+    // Optional: Add click event to the polygon to show more info
+    polygon.addListener('click', function(event) {
+      alert("Zone: {{ zone_data.zone_name }} clicked!");
+    });
+
+
+
+    {% endfor %}
+    {% endif %}
+
 
 
     // Optional: Add event listeners, e.g., for clicks or hovers

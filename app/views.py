@@ -2,9 +2,17 @@ from django.shortcuts import render
 from .models import Zone,ZoneBoundry,Location,LocationBoundry
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 
+
+
+def get_zone_list(city_id=1):
+    zone_list = Zone.objects.filter(is_active=True,city_id=city_id)
+    zone_list = zone_list.order_by('sequence_number')
+    return zone_list
+
 def index(request):
     context = {}
     context['page_name'] = "home"
+    context['zone_list'] = get_zone_list()
     return render(request, 'front/home.html', context)
 
 def leafletjs(request):

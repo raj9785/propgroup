@@ -75,6 +75,7 @@ class Zone(models.Model):
     city = models.ForeignKey(
         City, on_delete=models.CASCADE, null=True, blank=False, related_name='zone_city_list')
     zone_name = models.CharField(max_length=50, null=True, blank=False)
+    zone_color_code = models.CharField(max_length=7, null=True, blank=False)
     sequence_number = models.IntegerField(blank=False, default=1, null=True)
     is_active = models.BooleanField(default=True)
 
