@@ -132,7 +132,7 @@
         <h3>{{ zone_data.zone_name }}</h3>
         <p>This zone is designated with color code {{ zone_data.zone_color_code }}.</p>
          <div class="video-container">
-          <iframe width="200" height="113" src="https://www.youtube.com/embed/SvgDzaIoBxY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          <iframe width="200" height="113" src="https://www.youtube.com/embed/SvgDzaIoBxY?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
         <button onclick="alert('More info for {{ zone_data.zone_name }}')">More Info</button>
       </div>
@@ -177,7 +177,7 @@
 
       var infoContentAdm = `
       <div class="custom-info-window">
-        <h3>{{ zone_data.zone_name }}</h3>
+        <h3>${markerData.label}</h3>
         <p>This zone is designated with color code {{ zone.zone_color_code }}.</p>
         <div><strong>{{ zone_data.zone_name }}</strong><br>Marker ${markerData.label}</div>
          
@@ -193,6 +193,35 @@
       centerInfoWindowAdm.open(map, additionalMarker);
     });
 
+
+
+    // Define the coordinates for the path
+    var pathCoordinates = [
+      { lat: 28.401267223309986, lng: 77.04323387864554 }, // Start point
+      { lat: 28.400663222070822, lng: 77.030530936751 }, // Midpoint
+      { lat: 28.400663222070822, lng: 77.01645470384085 }  // End point
+    ];
+
+    // Create the polyline and add it to the map
+    var pathPolyline = new google.maps.Polyline({
+      path: pathCoordinates,
+      geodesic: true,
+      strokeColor: '#FF0000',    // Line color (red)
+      strokeOpacity: 1.0,        // Line opacity
+      strokeWeight: 3            // Line thickness
+    });
+
+    // Display the polyline on the map
+    pathPolyline.setMap(map);
+
+      // Optional: add markers at each point of the path
+    // pathCoordinates.forEach((location, index) => {
+    //   new google.maps.Marker({
+    //     position: location,
+    //     map: map,
+    //     title: `Point ${index + 1}`
+    //   });
+    // });
 
     });
    
