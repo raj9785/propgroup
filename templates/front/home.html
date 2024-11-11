@@ -117,13 +117,11 @@
       map: map,
       title: '{{ zone_data.zone_name }}',  // This displays the zone name on hover
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 8,  // Size of the marker icon
-        fillColor: '{{ zone_data.zone_color_code }}',
-        fillOpacity: 1,
-        strokeColor: 'white',
-        strokeWeight: 2
-      }
+      url: "/static/front/img/dron.png", // URL to the custom icon image
+      scaledSize: new google.maps.Size(50, 50), // Scale the icon to desired size
+      origin: new google.maps.Point(0, 0), // Origin point of the icon
+      anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
+    }
     });
 
      // Custom HTML for the Info Window content
@@ -145,6 +143,11 @@
     centerMarker.addListener('click', function() {
       centerInfoWindow.open(map, centerMarker);
     });
+
+    centerMarker.addListener('mouseover', function() {
+      centerInfoWindow.open(map, centerMarker);
+    });
+
 
     var additionalMarkers = [
       { lat: 28.434320575598562, lng: 77.01516097882633, label: "Hero MotoCorp" },
@@ -199,14 +202,15 @@
     var pathCoordinates = [
       { lat: 28.401267223309986, lng: 77.04323387864554 }, // Start point
       { lat: 28.400663222070822, lng: 77.030530936751 }, // Midpoint
-      { lat: 28.400663222070822, lng: 77.01645470384085 }  // End point
+      { lat: 28.400663222070822, lng: 77.01645470384085 },  // End point
+      { lat: 28.400790391605803, lng: 77.01130303102586 }  // End point
     ];
 
     // Create the polyline and add it to the map
     var pathPolyline = new google.maps.Polyline({
       path: pathCoordinates,
       geodesic: true,
-      strokeColor: '#FF0000',    // Line color (red)
+      strokeColor: 'blue',    // Line color (red)
       strokeOpacity: 1.0,        // Line opacity
       strokeWeight: 3            // Line thickness
     });
