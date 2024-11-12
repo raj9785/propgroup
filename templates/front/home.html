@@ -8,7 +8,15 @@
   <div class="compass-inner" id="compass">•</div> <!-- Inner circle for rotation -->
 </div>
 
-<div id="map" style="height: 600px;"></div>
+<div id="map" style="height: 600px; position: relative;"></div>
+<div id="customInfoWindow" class="custom-info-window_info" style="display: none;">
+  <h3>Information</h3>
+  <p>This zone is designated with color code</p>
+  <div class="video-container">
+    <iframe width="200" height="113" src="https://www.youtube.com/embed/SvgDzaIoBxY?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+  
+</div>
 
 
 <script>
@@ -70,6 +78,7 @@
       var clickedLat = event.latLng.lat();
       var clickedLng = event.latLng.lng();
       console.log("GeoJSON clicked at:", { lat: clickedLat, lng: clickedLng });
+      document.getElementById("customInfoWindow").style.display = "none";
     });
 
 
@@ -132,7 +141,7 @@
          <div class="video-container">
           <iframe width="200" height="113" src="https://www.youtube.com/embed/SvgDzaIoBxY?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
-        <button onclick="alert('More info for {{ zone_data.zone_name }}')">More Info</button>
+        <button id="{{ zone_data.id }}" onclick="openInfoWindow('{{ zone_data.id }}','zone')">More Info</button>
       </div>
     `;
 
@@ -144,9 +153,9 @@
       centerInfoWindow.open(map, centerMarker);
     });
 
-    centerMarker.addListener('mouseover', function() {
-      centerInfoWindow.open(map, centerMarker);
-    });
+    // centerMarker.addListener('mouseover', function() {
+    //   centerInfoWindow.open(map, centerMarker);
+    // });
 
 
     var additionalMarkers = [
@@ -243,11 +252,16 @@
 
 
     // Optional: Add event listeners, e.g., for clicks or hovers
-    map.data.addListener('click', function (event) {
+    // map.data.addListener('click', function (event) {
+    //   document.getElementById("customInfoWindow").style.display = "none";
+    // });
+  }
 
-    });
+  function openInfoWindow(id,type){
+    document.getElementById("customInfoWindow").style.display = "block";
   }
 </script>
+
 
 
 {% endblock %}
