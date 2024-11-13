@@ -9,10 +9,43 @@ def get_zone_list(city_id=1):
     zone_list = zone_list.order_by('sequence_number')
     return zone_list
 
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import Zone, ZoneBoundry
+
+def get_zones_with_boundaries(request):
+    # Query all active zones
+    zones = Zone.objects.filter(is_active=True)
+
+    # Prepare data to be sent in JSON response
+    zones_data = []
+    for zone in zones:
+        # Get all boundary points for the zone, ordered by sequence number
+        boundaries = ZoneBoundry.objects.filter(zone=zone).order_by('sequence_number')
+        
+        # Format boundary coordinates for the frontend
+        boundary_coords = [{"lat": float(boundary.latitude), "lng": float(boundary.longitude)} for boundary in boundaries]
+        
+        # Add zone information and its boundaries
+        zones_data.append({
+            "id": str(zone.id),
+            "info": zone.zone_name,
+            "color": zone.zone_color_code,
+            "coords": boundary_coords
+        })
+    
+    return zones_data
+
 def index(request):
     context = {}
     context['page_name'] = "home"
-    context['zone_list'] = get_zone_list()
+    zone_list=get_zone_list()
+    context['zone_list'] = zone_list
+    context['zones_with_boundaries'] = get_zones_with_boundaries(request)
+    
+    
+
+
     return render(request, 'front/home.html', context)
 
 def leafletjs(request):
