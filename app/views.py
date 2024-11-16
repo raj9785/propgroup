@@ -1,8 +1,14 @@
 from django.shortcuts import render
 from .models import Zone,ZoneBoundry,Location,LocationBoundry
+from dronevideo.models import DroneVideo,DroneVideoPath
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 
 
+def get_video_list(request):
+    records = DroneVideo.objects.all().order_by('title').filter(is_active=True)
+    data = {'list': list(records.values("id", "title"))}
+    respone = JsonResponse(data)
+    return respone
 
 def get_zone_list(city_id=1):
     zone_list = Zone.objects.filter(is_active=True,city_id=city_id)
@@ -139,6 +145,50 @@ def savelocationboundry(request):
         else:
             resp['error'] = True
             resp['message'] = "Please select Location"
+            resp['class'] = "error"
+            respone = JsonResponse(resp, safe=False)
+            return respone
+
+    else:
+        resp['error'] = True
+        resp['message'] = "Please fill all required field"
+        resp['class'] = "error"
+        respone = JsonResponse(resp, safe=False)
+        return respone    
+    
+
+
+def save_drone_path_video(request):
+    resp = {}
+    if request.method == 'POST':
+        longitudes = request.POST.getlist('longitudes[]')
+        latitudes = request.POST.getlist('latitudes[]')
+        drone_video = request.POST.get('drone_video')
+        if drone_video:
+            if latitudes and longitudes:
+                for index, latitude in enumerate(latitudes):
+                    if latitude and longitudes[index]:
+                        route = DroneVideoPath()
+                        route.drone_video_id = drone_video
+                        route.latitude = latitude
+                        route.longitude = longitudes[index]
+                        route.sequence_number = index+1
+                        route.save()
+
+                resp['error'] = False
+                resp['message'] = "Drone Video Path added successfully."
+                resp['class'] = "success"
+                respone = JsonResponse(resp, safe=False)
+                return respone
+            else:
+                resp['error'] = True
+                resp['message'] = "Please add marker to the map"
+                resp['class'] = "error"
+                respone = JsonResponse(resp, safe=False)
+                return respone
+        else:
+            resp['error'] = True
+            resp['message'] = "Please select Drone Video"
             resp['class'] = "error"
             respone = JsonResponse(resp, safe=False)
             return respone

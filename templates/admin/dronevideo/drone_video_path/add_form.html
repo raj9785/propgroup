@@ -1,0 +1,289 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+<script src="{% url 'admin:jsi18n' %}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+{{ media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; {% if has_view_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+&rsaquo; {% if add %}{% blocktranslate with name=opts.verbose_name %}Add {{ name }}{% endblocktranslate %}{% else %}{{ original|truncatewords:"18" }}{% endif %}
+</div>
+{% endblock %}
+{% endif %}
+
+{% block content %}<div id="content-main">
+{% block object-tools %}
+{% if change %}{% if not is_popup %}
+  <ul class="object-tools">
+    {% block object-tools-items %}
+      {% change_form_object_tools %}
+    {% endblock %}
+  </ul>
+{% endif %}{% endif %}
+{% endblock %}
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" novalidate>{% csrf_token %}{% block form_top %}{% endblock %}
+<div>
+   
+{% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
+{% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
+{% if save_on_top %}{% block submit_buttons_top %}{% submit_row %}{% endblock %}{% endif %}
+{% if errors %}
+    <p class="errornote">
+    {% if errors|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+    </p>
+    {{ adminform.form.non_field_errors }}
+{% endif %}
+
+<div class="form-row field-slug">
+  <div>
+    <div class="flex-container">
+          <div class="related-widget-wrapper" data-model-ref="event">
+            <select name="drone_video" required="" id="id_event">
+            <option value="" selected="">Select Drone Video</option>
+          </select>
+</div>
+      
+  
+</div>    
+  </div>
+  
+</div>
+
+<div class="form-row field-slug" style="float:left; width: 100%">
+    <div>
+            <div class="flex-container" style="gap: 50px;">
+                    <div id="map" style="height: 500px; width: 100%"></div>
+                    <div class="form-row field-slug" id="latlongs" style="width: 100%; display: flex; flex-direction: column; gap: 25px;">
+   
+                    </div>
+            </div>
+    </div>
+    
+</div>
+<div class="submit-row">
+    <input type="button" value="Save" class="default saveroute" id="saveroute" name="save">
+    
+</div>
+<div class="row">
+  <div class="response_msg"></div>
+</div>
+
+{% block admin_change_form_document_ready %}
+    <script id="django-admin-form-add-constants"
+            src="{% static 'admin/js/change_form.js' %}"
+            {% if adminform and add %}
+                data-model-name="{{ opts.model_name }}"
+            {% endif %}
+            async>
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet Control Geocoder CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Leaflet Control Geocoder JavaScript -->
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script>
+        // Initialize the map
+        var map = L.map("map").setView([20.5937, 78.9629], 5);
+  
+        // Add a tile layer
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap contributors",
+        }).addTo(map);
+  
+        var path = L.polyline([]).addTo(map);
+
+        var searchControl = L.Control.geocoder({
+            defaultMarkGeocode: false,  // Prevents automatic marker placement on geocoding
+          }).addTo(map);
+          searchControl.on('markgeocode', function (e) {
+            var latlng = e.geocode.center;
+            
+            reverseGeocode(latlng, function (locationName) {
+                $("#latlongs").append(`<div class="rows-latlong" style="display: flex; flex-direction: column; gap: 10px;padding-bottom:15px;border-bottom:1px solid #e1e1e1">
+          <div class="fileds-latlong" style="width:100%">
+              <label for="locationName" style="font-weight:bold">Location:</label>
+              <input type="text" style="width:60%; margin-left: 10px" value="${locationName}" placeholder="Location" name="locations[]">
+          </div>
+          <div class="col-2-lat" style="display:flex; gap:20px">
+              <div class="fileds-latlong">
+                  <label for="latitude" style="font-weight:bold; margin-right: 10px; margin-right: 10px">Latitude:</label>
+                  <input type="text" value="${latlng.lat}" name="latitudes[]">
+              </div>
+              <div class="fileds-latlong">
+                  <label for="longitude" style="font-weight:bold; margin-right:10px; margin-bottom: 10px">Longitude:</label>
+                  <input type="text" value="${latlng.lng}" name="longitudes[]">
+              </div>  
+          </div>
+          <div class="fileds-latlong">
+              <a class='rows-latlong-remove' data-lat="${latlng.lat}" data-lng="${latlng.lng}" href="javascript:void(0)" style="position: relative; left: 70%;">
+                  <button style="all:unset;pointer:cursor;padding:5px 30px;border:1px solid #e1e1e1;">remove</button>
+              </a>
+          </div>
+      </div>`);
+      
+              });
+            L.marker(latlng).addTo(map);
+        
+            // Zoom to the selected location
+            map.setView(latlng, 15);  // Adjust the zoom level as needed
+          });
+        var markers = L.layerGroup().addTo(map);
+        var pathCoordinates = []; // Array to store path coordinates
+        $("#latlongs").on("click", ".rows-latlong-remove", function () {
+            var element = $(this);
+            var lat = element.data("lat");
+            var lng = element.data("lng");
+          
+            // Remove the corresponding marker
+            var markerToRemove = markers.getLayers().find(layer => {
+              var markerLatLng = layer.getLatLng();
+              return markerLatLng.lat === parseFloat(lat) && markerLatLng.lng === parseFloat(lng);
+            });
+           
+            if (markerToRemove) {
+              markers.removeLayer(markerToRemove);
+            }
+          
+            // Remove the clicked element
+            element.parent().parent().remove();
+          
+            path.setLatLngs([]);
+          });
+        map.on("click", function (e) {
+          var latlng = e.latlng;
+          // console.log(e);
+          // Add point to the pathCoordinates array
+          // pathCoordinates.push(latlng);
+   
+          // Set the coordinates for the path
+          //path.setLatLngs(pathCoordinates);
+  
+          // Add marker at the clicked point
+          var marker = L.marker(latlng).addTo(markers);
+          reverseGeocode(latlng, function (locationName) {
+          $("#latlongs").append(`<div class="rows-latlong" style="display: flex; flex-direction: column; gap: 10px;padding-bottom:15px;border-bottom:1px solid #e1e1e1">
+    <div class="fileds-latlong" style="width:100%">
+        <label for="locationName" style="font-weight:bold">Location:</label>
+        <input type="text" style="width:60%; margin-left: 10px" value="${locationName}" placeholder="Location" name="locations[]">
+    </div>
+    <div class="col-2-lat" style="display:flex; gap:20px">
+        <div class="fileds-latlong">
+            <label for="latitude" style="font-weight:bold; margin-right: 10px; margin-right: 10px">Latitude:</label>
+            <input type="text" value="${latlng.lat}" name="latitudes[]">
+        </div>
+        <div class="fileds-latlong">
+            <label for="longitude" style="font-weight:bold; margin-right:10px; margin-bottom: 10px">Longitude:</label>
+            <input type="text" value="${latlng.lng}" name="longitudes[]">
+        </div>  
+    </div>
+    <div class="fileds-latlong">
+        <a class='rows-latlong-remove' data-lat="${latlng.lat}" data-lng="${latlng.lng}" href="javascript:void(0)" style="position: relative; left: 70%;">
+            <button style="all:unset;pointer:cursor;padding:5px 30px;border:1px solid #e1e1e1;">remove</button>
+        </a>
+    </div>
+</div>`);
+
+        });
+          marker.on("click", function () {
+             var latLng = marker.getLatLng();
+             var lat = latLng.lat;
+             var lng = latLng.lng;
+           // markers.removeLayer(marker);
+            //$("#" + lat + "_" + lng).remove();
+            //path.setLatLngs([]);
+          });
+        });
+      </script>
+<script>
+    function reverseGeocode(latlng, callback) {
+        var geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=18&addressdetails=1`;
+      
+        $.ajax({
+          url: geocodeUrl,
+          type: 'GET',
+          dataType: 'json',
+          success: function (data) {
+            var locationName = data.display_name;
+            callback(locationName);
+          },
+          error: function (error) {
+            console.error('Error performing reverse geocoding:', error);
+            callback('Unknown Location');
+          }
+        });
+      }
+   $(document).ready(function(){
+    get_events();
+    $(".saveroute").on("click",function(){
+       form = document.getElementById('dronevideopath_form');
+       formdata = new FormData(form);
+       $.ajax({
+        url:'/save_drone_path_video',
+        type: "POST",
+        enctype: 'multipart/form-data',
+        data: formdata,
+        dataType: "json",
+        cache:false,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          if (data.error == false) {
+            $('#dronevideopath_form')[0].reset();
+            response='<div class="alert alert-success" role="alert">'+data.message+'</div>';
+            $(".response_msg").html(response);
+            window.location.reload();
+          } else {
+            var response = "";
+            var resp = data.message;
+            response='<div class="alert alert-danger" role="alert">'+data.message+'</div>';
+            $(".response_msg").html(response);
+          }
+        },
+      });
+    });
+        
+    });
+
+    function get_events(){
+      $.ajax({
+        url: '/get_video_list',
+        type: 'GET',
+        data: {'get_list' : 1},
+        success: function(result){
+          result=result.list;
+          $("#id_event").html("");
+          $("#id_event").append('<option  value="">Select Video Path</option>');
+          for (var i = result.length - 1; i >= 0; i--) {
+              $("#id_event").append('<option value="'+result[i].id+'">'+ result[i].title +'</option>');
+          };
+       },
+    });
+    }
+    </script>
+{% endblock %}
+
+{# JavaScript for prepopulated fields #}
+{% prepopulated_fields_js %}
+
+</div>
+</form>
+  
+
+</div>
+{% endblock %}

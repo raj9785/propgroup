@@ -34,5 +34,7 @@ urlpatterns = [
     path('zone_list', views.zone_list,name="zone_list"),
     path('saveroute', views.saveroute,name="saveroute"),
     path('location_list', views.location_list,name="location_list"),
+    path('get_video_list', views.get_video_list,name="get_video_list"),
     path('savelocationboundry', views.savelocationboundry,name="savelocationboundry"),
+    path('save_drone_path_video', views.save_drone_path_video,name="save_drone_path_video"),
 ]
