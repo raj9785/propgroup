@@ -1,14 +1,14 @@
 from django.db import models
 from app.models import Zone,City,State
 
-class Landmark(models.Model):
+class Project(models.Model):
     state = models.ForeignKey(
-        State, on_delete=models.CASCADE, null=True, blank=False, related_name='landmark_state')
+        State, on_delete=models.CASCADE, null=True, blank=False, related_name='project_state')
     city = models.ForeignKey(
-        City, on_delete=models.CASCADE, null=True, blank=False, related_name='landmark_city')
+        City, on_delete=models.CASCADE, null=True, blank=False, related_name='project_city')
     zone = models.ForeignKey(
-        Zone, on_delete=models.CASCADE, null=True, blank=False, related_name='landmark_zone')
-    name = models.CharField(max_length=255,null=True, blank=False)
+        Zone, on_delete=models.CASCADE, null=True, blank=False, related_name='project_zone')
+    project_name = models.CharField(max_length=255,null=True, blank=False)
     description = models.TextField(blank=True, null=True)
     icon = models.FileField(upload_to='icons/',
                              verbose_name="Icon", null=True, blank=True,max_length=255)
@@ -19,10 +19,9 @@ class Landmark(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('state','city','zone','name')
-        verbose_name = "Landmark"
-        verbose_name_plural = "Landmark List"
+        unique_together = ('state','city','zone','project_name')
+        verbose_name = "Project"
+        verbose_name_plural = "Project List"
     
     def __str__(self):
-        return self.name
-    
+        return self.project_name
