@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from .models import Zone,ZoneBoundry,Location,LocationBoundry
+from landmark.models import Landmark
+from projects.models import Project
 from dronevideo.models import DroneVideo,DroneVideoPath
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 
@@ -19,9 +21,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Zone, ZoneBoundry
 
-def get_zones_with_boundaries(request):
+def get_zones_with_boundaries(city_id):
     # Query all active zones
-    zones = Zone.objects.filter(is_active=True)
+    zones = Zone.objects.filter(is_active=True,city_id=city_id)
 
     # Prepare data to be sent in JSON response
     zones_data = []
@@ -42,12 +44,54 @@ def get_zones_with_boundaries(request):
     
     return zones_data
 
+
+def get_markers(city_id):
+    markers = []
+    landmark_list = Landmark.objects.filter(is_active=True,city_id=city_id)
+    if landmark_list:
+        for landmark in landmark_list:
+            if landmark.icon:
+               icon =landmark.icon.url
+            else:
+               icon=""
+            markers.append({
+                "id": str(landmark.id),
+                "type": "landmark",
+                "label": landmark.name,
+                "lat": float(landmark.latitude),
+                "lng": float(landmark.longitude),
+                'description':landmark.description,
+                'icon':icon,
+            })
+
+    project_list = Project.objects.filter(is_active=True,city_id=city_id)
+    if project_list:
+        for project in project_list:
+            if project.icon:
+               icon =project.icon.url
+            else:
+               icon=""
+            markers.append({
+                "id": str(project.id),
+                "type": "landmark",
+                "label": project.project_name,
+                "lat": float(project.latitude),
+                "lng": float(project.longitude),
+                'description':project.description,
+                'icon':icon,
+            })    
+
+    return markers    
+
+
 def index(request):
     context = {}
     context['page_name'] = "home"
     zone_list=get_zone_list()
     context['zone_list'] = zone_list
-    context['zones_with_boundaries'] = get_zones_with_boundaries(request)
+    city_id=1
+    context['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
+    context['markers'] = get_markers(city_id)
     
     
 

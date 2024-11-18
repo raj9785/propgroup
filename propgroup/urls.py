@@ -38,3 +38,5 @@ urlpatterns = [
     path('savelocationboundry', views.savelocationboundry,name="savelocationboundry"),
     path('save_drone_path_video', views.save_drone_path_video,name="save_drone_path_video"),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

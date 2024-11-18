@@ -193,37 +193,28 @@ polygonsData.forEach((polygonData, index) => {
     // });
 
 
-    var additionalMarkers = [
-      { lat: 28.434320575598562, lng: 77.01516097882633, label: "Hero MotoCorp" },
-      { lat: 28.404438694364607, lng: 77.00272179892329, label: "American Express" },
-      { lat: 28.40200420181406, lng: 76.98938981407711, label: "Haldiram's - Kherki Daula" },
-      { lat: 28.405784110959946, lng: 77.04144714320837, label: "Park View City 1" }
-    ];
+    var additionalMarkers = {{ markers|safe }};
 
     // Add each additional marker with a click event
     additionalMarkers.forEach(function(markerData) {
       var additionalMarker = new google.maps.Marker({
         position: { lat: markerData.lat, lng: markerData.lng },
         map: map,
-        title: '{{ zone_data.zone_name }} - ' + markerData.label,
+        title: markerData.label,
 
         //label: markerData.label,
         icon: {
-          url: "/static/front/img/bb.png", // URL to the custom icon image
+          url: markerData.icon, // URL to the custom icon image
           scaledSize: new google.maps.Size(25, 25), // Scale the icon to desired size
           origin: new google.maps.Point(0, 0), // Origin point of the icon
           anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
         }
       });
 
-      
-      
-
-
       var infoContentAdm = `
       <div class="custom-info-window">
         <h3>${markerData.label}</h3>
-        <p>This zone is designated with color code {{ zone.zone_color_code }}.</p>
+        <p>${markerData.description}</p>
         <div><strong>{{ zone_data.zone_name }}</strong><br>Marker ${markerData.label}</div>
          
         
