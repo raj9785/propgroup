@@ -10,6 +10,8 @@ class DroneVideo(models.Model):
         Zone, on_delete=models.CASCADE, null=True, blank=False, related_name='drone_video_zone')
     video_url = models.URLField(max_length=255, null=True, blank=False)
     title = models.CharField(max_length=255,null=True, blank=False)
+    description = models.TextField(blank=True, null=True)
+    path_color_code = models.CharField(max_length=7, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

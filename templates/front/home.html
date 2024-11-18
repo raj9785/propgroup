@@ -11,17 +11,9 @@
 <div id="map" style="height: 600px; position: relative;"></div>
 <div id="customInfoWindow" class="custom-info-window_info" style="display: none;">
   <h3>Information</h3>
-  <p>This zone is designated with color code</p>
-  <div class="video-container" id="video_container">
-    <iframe width="200" height="113" src="https://www.youtube.com/embed/SvgDzaIoBxY?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-  </div>
-  <div class="other-info">
-
-    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
-    
-
-  </div>
-  
+  <p id="video_title"></p>
+  <div class="video-container" id="video_container"></div>
+  <div class="other-info" id="video_info"></div>
 </div>
 
 
@@ -87,119 +79,65 @@
       document.getElementById("customInfoWindow").style.display = "none";
     });
 
-    var polygonsData ={{ zones_with_boundaries|safe }}
+    var polygonsData = {{ zones_with_boundaries| safe}}
 
-    // Loop through each polygon data and create a polygon
-polygonsData.forEach((polygonData, index) => {
-        var fillOpacity = polygonData.color ? 0.35 : 0;
+  // Loop through each polygon data and create a polygon
+  polygonsData.forEach((polygonData, index) => {
+    var fillOpacity = polygonData.color ? 0.35 : 0;
 
-      var polygon = new google.maps.Polygon({
-          paths: polygonData.coords,
-          strokeColor: polygonData.color,
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: polygonData.color,
-          fillOpacity: fillOpacity,
-          clickable: true
-      });
-        
+    var polygon = new google.maps.Polygon({
+      paths: polygonData.coords,
+      strokeColor: polygonData.color,
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: polygonData.color,
+      fillOpacity: fillOpacity,
+      clickable: true
+    });
+
 
     // Display the polygon on the map
     polygon.setMap(map);
 
     // Add a click event to each polygon
-    google.maps.event.addListener(polygon, 'click', function(event) {
-        // Open an InfoWindow or perform any other action here
-        var infoWindow = new google.maps.InfoWindow({
-            content: `<h3>${polygonData.info}</h3>`,
-            position: event.latLng
-        });
-        infoWindow.open(map);
-    });
-});
-      
-
-{%if zone_list %}
-      {% for zone_data in zone_list %}
-    // Calculate the center of the polygon
-    // function getPolygonCenter(coords) {
-    //   var latSum = 0;
-    //   var lngSum = 0;
-    //   coords.forEach(function(coord) {
-    //     latSum += coord.lat;
-    //     lngSum += coord.lng;
-    //   });
-    //   return {
-    //     lat: latSum / coords.length,
-    //     lng: lngSum / coords.length
-    //   };
-    // }
-
-    // var polygonCenter = getPolygonCenter(polygonCoords);
-
-    // // Create a marker at the center with the zone name
-    // var centerMarker = new google.maps.Marker({
-    //   position: polygonCenter,
-    //   map: map,
-    //   title: '{{ zone_data.zone_name }}',  // This displays the zone name on hover
-    //   icon: {
-    //   url: "/static/front/img/dron.png", // URL to the custom icon image
-    //   scaledSize: new google.maps.Size(50, 50), // Scale the icon to desired size
-    //   origin: new google.maps.Point(0, 0), // Origin point of the icon
-    //   anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
-    // }
-    // });
-
-    //  // Custom HTML for the Info Window content 
-    //  var infoContent = `
-    //   <div class="custom-info-window">
-    //     <h3>{{ zone_data.zone_name }}</h3>
-    //     <p>This zone is designated with color code {{ zone_data.zone_color_code }}.</p>
-    //      <div class="video-container">
-    //       <iframe width="200" height="113" src="https://www.youtube.com/embed/SvgDzaIoBxY?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    //     </div>
-    //     <button id="{{ zone_data.id }}" onclick="openInfoWindow('{{ zone_data.id }}','zone')">More Info</button>
-    //   </div>
-    // `;
-
-    // var centerInfoWindow = new google.maps.InfoWindow({
-    //   content: infoContent
-    // });
-
-    // centerMarker.addListener('click', function() {
-    //   centerInfoWindow.open(map, centerMarker);
-    // });
-
-    // centerMarker.addListener('mouseover', function() {
-    //   centerInfoWindow.open(map, centerMarker);
-    // });
-
-
-    var additionalMarkers = {{ markers|safe }};
-
-    // Add each additional marker with a click event
-    additionalMarkers.forEach(function(markerData) {
-      var additionalMarker = new google.maps.Marker({
-        position: { lat: markerData.lat, lng: markerData.lng },
-        map: map,
-        title: markerData.label,
-
-        //label: markerData.label,
-        icon: {
-          url: markerData.icon, // URL to the custom icon image
-          scaledSize: new google.maps.Size(25, 25), // Scale the icon to desired size
-          origin: new google.maps.Point(0, 0), // Origin point of the icon
-          anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
-        }
+    google.maps.event.addListener(polygon, 'click', function (event) {
+      // Open an InfoWindow or perform any other action here
+      var infoWindow = new google.maps.InfoWindow({
+        content: `<h3>${polygonData.info}</h3>`,
+        position: event.latLng
       });
+      infoWindow.open(map);
+    });
+  });
 
-      var infoContentAdm = `
+
+  // {%if zone_list %}
+  //       {% for zone_data in zone_list %}
+
+
+  var additionalMarkers = {{ markers| safe }};
+
+  // Add each additional marker with a click event
+  additionalMarkers.forEach(function (markerData) {
+    var additionalMarker = new google.maps.Marker({
+      position: { lat: markerData.lat, lng: markerData.lng },
+      map: map,
+      title: markerData.label,
+
+      //label: markerData.label,
+      icon: {
+        url: markerData.icon, // URL to the custom icon image
+        scaledSize: new google.maps.Size(25, 25), // Scale the icon to desired size
+        origin: new google.maps.Point(0, 0), // Origin point of the icon
+        anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
+      }
+    });
+
+    var infoContentAdm = `
       <div class="custom-info-window">
         <h3>${markerData.label}</h3>
         <p>${markerData.description}</p>
         <div><strong>{{ zone_data.zone_name }}</strong><br>Marker ${markerData.label}</div>
-         
-        
       </div>
     `;
 
@@ -207,96 +145,63 @@ polygonsData.forEach((polygonData, index) => {
       content: infoContentAdm
     });
 
-    additionalMarker.addListener('click', function() {
+    additionalMarker.addListener('click', function () {
       centerInfoWindowAdm.open(map, additionalMarker);
     });
 
+  });
 
+  var paths = {{ drone_video_paths| safe }}
 
-    // Define the coordinates for the path
-    var pathCoordinates = [
-      { lat: 28.401267223309986, lng: 77.04323387864554 }, // Start point
-      { lat: 28.400663222070822, lng: 77.030530936751 }, // Midpoint
-      { lat: 28.400663222070822, lng: 77.01645470384085 },  // End point
-      { lat: 28.400790391605803, lng: 77.01130303102586 },  // End point
-      { lat: 28.401644722336105, lng: 77.00506784123411 },  // End point
-      { lat: 28.401946720588683, lng: 77.00202656925349 },  // End point
-      { lat: 28.40345669894016, lng: 76.99739171207575 },  // End point
-      { lat: 28.40534414161781, lng: 76.99476814813954 },  // End point
-      { lat: 28.405570632479535, lng: 76.99236489933958 },  // End point
-      { lat: 28.407986504875364, lng: 76.98652841252317 },  // End point
-      { lat: 28.4085904643658, lng: 76.98601342839231 }, 
-    ];
-
-    var pathCoordinates2 = [
-      { lat: 28.436250724301985, lng: 77.00850105829579 }, // Start point
-      { lat: 28.429608715942877, lng: 77.00300789423329 }, // Midpoint
-      { lat: 28.40243252334362, lng: 76.9872150475536 },  // End point
-      { lat: 28.395184360958307, lng: 76.98240852899892 },  // End point
-      { lat: 28.390243658804433, lng: 76.97554207392079 },  // End point
-      { lat: 28.382390557504852, lng: 76.96730232782704 },  // End point
-      { lat: 28.37755759069396, lng: 76.95768929071767 },  // End point
-    ];
-
-
-   // Array of path coordinates for each polyline
-var paths = [
-    { coordinates: pathCoordinates, color: "green", info: "Path 1 Information",html_data:'<iframe width="200" height="113" src="https://www.youtube.com/embed/8eXX0sJaPZk?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' },
-    { coordinates: pathCoordinates2, color: "yellow", info: "Path 2 Information",html_data:'<iframe width="200" height="113" src="https://www.youtube.com/embed/XqXEU3_UExY?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' },
-];
-
-// Loop through each path in the array
-paths.forEach((pathData, index) => {
+  // Loop through each path in the array
+  paths.forEach((pathData, index) => {
     var pathPolyline = new google.maps.Polyline({
-        path: pathData.coordinates,
-        strokeColor: pathData.color,
-        strokeOpacity: 0,
-        strokeWeight: 5,
-        icons: [
-            {
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 4,
-                    fillColor: pathData.color,
-                    fillOpacity: 1,
-                    strokeWeight: 0,
-                },
-                offset: "0",
-                repeat: "10px",
-            },
-        ],
-        zIndex: 2099,
+      path: pathData.coordinates,
+      strokeColor: pathData.color,
+      strokeOpacity: 0,
+      strokeWeight: 5,
+      icons: [
+        {
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 4,
+            fillColor: pathData.color,
+            fillOpacity: 1,
+            strokeWeight: 0,
+          },
+          offset: "0",
+          repeat: "10px",
+        },
+      ],
+      zIndex: 2099,
     });
 
     // Display the polyline on the map
     pathPolyline.setMap(map);
 
     // Add mouseover event for each polyline
-    google.maps.event.addListener(pathPolyline, 'mouseover', function(event) {
-        // Display custom information in the info window or another HTML element
-        document.getElementById("customInfoWindow").style.display = "block";
-        //document.getElementById("customInfoWindow").innerText = pathData.info;
-        document.getElementById("video_container").innerHTML = pathData.html_data;
+    google.maps.event.addListener(pathPolyline, 'mouseover', function (event) {
+      // Display custom information in the info window or another HTML element
+      document.getElementById("customInfoWindow").style.display = "block";
+      //document.getElementById("customInfoWindow").innerText = pathData.info;
+      document.getElementById("video_container").innerHTML = pathData.html_data;
+      document.getElementById("video_info").innerHTML = pathData.info;
+      document.getElementById("video_title").innerHTML = pathData.title;
     });
-
+    
     // Add mouseout event to hide the info window when the mouse leaves the polyline
-    google.maps.event.addListener(pathPolyline, 'mouseout', function() {
-        document.getElementById("customInfoWindow").style.display = "none";
+    google.maps.event.addListener(pathPolyline, 'mouseout', function () {
+      document.getElementById("customInfoWindow").style.display = "none";
     });
-});
+  });
+ 
+  // Optional: Add click event to the polygon to show more info
+  // polygon.addListener('click', function (event) {
+  //   alert("Zone: {{ zone_data.zone_name }} clicked!");
+  // });
 
-    });
-   
-
-    // Optional: Add click event to the polygon to show more info
-    polygon.addListener('click', function(event) {
-      alert("Zone: {{ zone_data.zone_name }} clicked!");
-    });
-
-
-
-    {% endfor %}
-    {% endif %}
+  // {% endfor %}
+  // {% endif %}
 
 
 
@@ -306,7 +211,7 @@ paths.forEach((pathData, index) => {
     // });
   }
 
-  function openInfoWindow(id,type){
+  function openInfoWindow(id, type) {
     document.getElementById("customInfoWindow").style.display = "block";
   }
 </script>
