@@ -35,10 +35,14 @@ def get_zones_with_boundaries(city_id):
         boundary_coords = [{"lat": float(boundary.latitude), "lng": float(boundary.longitude)} for boundary in boundaries]
         
         # Add zone information and its boundaries
+        if zone.zone_color_code:
+            color_code=zone.zone_color_code
+        else:
+            color_code=""    
         zones_data.append({
             "id": str(zone.id),
             "info": zone.zone_name,
-            "color": zone.zone_color_code,
+            "color": color_code,
             "coords": boundary_coords
         })
     

@@ -91,15 +91,18 @@
 
     // Loop through each polygon data and create a polygon
 polygonsData.forEach((polygonData, index) => {
-    var polygon = new google.maps.Polygon({
-        paths: polygonData.coords,
-        strokeColor: polygonData.color,
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: polygonData.color,
-        fillOpacity: 0.35,
-        clickable: true
-    });
+        var fillOpacity = polygonData.color ? 0.35 : 0;
+
+      var polygon = new google.maps.Polygon({
+          paths: polygonData.coords,
+          strokeColor: polygonData.color,
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: polygonData.color,
+          fillOpacity: fillOpacity,
+          clickable: true
+      });
+        
 
     // Display the polygon on the map
     polygon.setMap(map);
@@ -116,29 +119,8 @@ polygonsData.forEach((polygonData, index) => {
 });
       
 
-    {%if zone_list %}
-    
-    {% for zone_data in zone_list %}
-    
-
-    // var polygonCoords = [
-    //   {% for boundary in zone_data.zones.all %}
-    //     { lat: {{ boundary.latitude }}, lng: {{ boundary.longitude }} },
-    //   {% endfor %}
-    // ];
-
-    // var polygon = new google.maps.Polygon({
-    //   paths: polygonCoords,
-    //   strokeColor: '{{ zone_data.zone_color_code }}',  // Ensure zone color is a valid code
-    //   strokeOpacity: 0.8,
-    //   strokeWeight: 2,
-    //   fillColor: '{{ zone_data.zone_color_code }}',    // Ensure zone color is a valid code
-    //   fillOpacity: 0.35,
-    //   clickable: true  // Ensure the polygon is clickable
-    // });
-    // Display the polygon on the map
-   // polygon.setMap(map);
-
+{%if zone_list %}
+      {% for zone_data in zone_list %}
     // Calculate the center of the polygon
     // function getPolygonCenter(coords) {
     //   var latSum = 0;
@@ -302,48 +284,6 @@ paths.forEach((pathData, index) => {
         document.getElementById("customInfoWindow").style.display = "none";
     });
 });
-
-
-
-
-    // // Create the polyline and add it to the map
-    // var pathPolyline = new google.maps.Polyline({
-    //         path: pathCoordinates,
-    //         strokeColor: "green", // Line color
-    //         strokeOpacity: 0,       // Make the main line invisible
-    //         strokeWeight: 5,
-    //         icons: [
-    //             {
-    //                 icon: {
-    //                     path: google.maps.SymbolPath.CIRCLE,
-    //                     scale: 4,           // Dot size
-    //                     fillColor: "green", // Dot color
-    //                     fillOpacity: 1,
-    //                     strokeWeight: 0,
-    //                 },
-    //                 offset: "0",
-    //                 repeat: "10px",        // Spacing between dots
-    //             },
-    //         ],
-    //         zIndex: 2099
-    //     });
-
-
-    // // Display the polyline on the map
-    // pathPolyline.setMap(map);
-
-    // google.maps.event.addListener(pathPolyline, 'mouseover', function(event) {
-    //   document.getElementById("customInfoWindow").style.display = "block";
-    
-    // });
-      // Optional: add markers at each point of the path
-    // pathCoordinates.forEach((location, index) => {
-    //   new google.maps.Marker({
-    //     position: location,
-    //     map: map,
-    //     title: `Point ${index + 1}`
-    //   });
-    // });
 
     });
    
