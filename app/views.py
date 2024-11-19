@@ -1,10 +1,11 @@
 from django.shortcuts import render
-from .models import Zone,ZoneBoundry,Location,LocationBoundry
+from .models import Zone,ZoneBoundry,Location,LocationBoundry,City
 from landmark.models import Landmark
 from projects.models import Project
 from dronevideo.models import DroneVideo,DroneVideoPath
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from urllib.parse import urlparse, parse_qs
+
 
 def get_youtube_video_id(url):
     parsed_url = urlparse(url)
@@ -22,9 +23,12 @@ def get_zone_list(city_id=1):
     zone_list = zone_list.order_by('sequence_number')
     return zone_list
 
-from django.shortcuts import render
-from django.http import JsonResponse
-from .models import Zone, ZoneBoundry
+
+def get_city_info(city_id=1):
+    city_info =City.objects.get(id=city_id)
+    return city_info
+
+
 
 def get_zones_with_boundaries(city_id):
     # Query all active zones
@@ -134,7 +138,7 @@ def index(request):
     context['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
     context['markers'] = get_markers(city_id)
     context['drone_video_paths'] = get_drone_video_paths(city_id)
-    
+    context['city_info'] = get_city_info(city_id)
     
 
 

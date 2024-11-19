@@ -54,6 +54,8 @@ class City(models.Model):
         State, on_delete=models.CASCADE, null=True, blank=False, related_name='state_list')
     city_name = models.CharField(max_length=50, null=True, blank=False)
     sequence_number = models.IntegerField(blank=False, default=1, null=True)
+    boundry_file = models.FileField(upload_to='city_boundry/',
+                             verbose_name="City Boundry", null=True, blank=False,max_length=255)
     is_active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

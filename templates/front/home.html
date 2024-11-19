@@ -60,7 +60,7 @@
     });
 
     // Load the GeoJSON file
-    map.data.loadGeoJson('static/front/gurgaon.geojson');
+    map.data.loadGeoJson('{{city_info.boundry_file.url}}');
 
     // Set the style for the boundaries
     map.data.setStyle({
