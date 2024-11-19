@@ -88,26 +88,50 @@
     var polygon = new google.maps.Polygon({
       paths: polygonData.coords,
       strokeColor: polygonData.color,
-      strokeOpacity: 0.8,
+      strokeOpacity: 0,
       strokeWeight: 2,
       fillColor: polygonData.color,
       fillOpacity: fillOpacity,
-      clickable: true
+      clickable: true,
+      
+
     });
 
 
     // Display the polygon on the map
     polygon.setMap(map);
 
-    // Add a click event to each polygon
-    google.maps.event.addListener(polygon, 'click', function (event) {
-      // Open an InfoWindow or perform any other action here
-      var infoWindow = new google.maps.InfoWindow({
-        content: `<h3>${polygonData.info}</h3>`,
-        position: event.latLng
+    // Create a dotted boundary using a polyline
+    var dottedLine = new google.maps.Polyline({
+        path: polygonData.coords, // Same path as the polygon
+        strokeColor: polygonData.color,
+        strokeOpacity: 0.7,
+        strokeWeight: 1,
+        icons: [
+          {
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 1, // Size of the dots
+            },
+            offset: "0",
+            repeat: "5px" // Spacing between dots
+          }
+        ]
       });
-      infoWindow.open(map);
-    });
+
+      // Add the polyline to the map
+      dottedLine.setMap(map);
+    
+
+    // Add a click event to each polygon
+    // google.maps.event.addListener(polygon, 'click', function (event) {
+    //   // Open an InfoWindow or perform any other action here
+    //   var infoWindow = new google.maps.InfoWindow({
+    //     content: `<h3>${polygonData.info}</h3>`,
+    //     position: event.latLng
+    //   });
+    //   infoWindow.open(map);
+    // });
   });
 
 
@@ -164,13 +188,13 @@
         {
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            scale: 4,
+            scale: 3,
             fillColor: pathData.color,
             fillOpacity: 1,
             strokeWeight: 0,
           },
           offset: "0",
-          repeat: "10px",
+          repeat: "7px",
         },
       ],
       zIndex: 2099,
