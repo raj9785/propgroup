@@ -53,7 +53,7 @@ closeButton.addEventListener('click', () => {
   function initMap() {
     
     // Coordinates for the center of the city (Gurgaon)
-    var cityCenter = { lat: {{city_info.center_latitude}}, lng: {{city_info.center_longitude}} };
+    var cityCenter = { lat: parseFloat('{{city_info.center_latitude}}'), lng: parseFloat('{{city_info.center_longitude}}') };
     // var gurgaonBounds = {
     //   north: 28.55476998927484,  // Northern boundary
     //   south: 28.371787123082136, // Southern boundary
@@ -61,10 +61,13 @@ closeButton.addEventListener('click', () => {
     //   east: 77.13974236261555    // Eastern boundary
     // };
     // Create the map, centered on the city
+    map_zoom=parseInt('{{city_info.map_zoom}}');
+    map_min_zoom=parseInt('{{city_info.map_min_zoom}}');
+    map_max_zoom=parseInt('{{city_info.map_max_zoom}}');
     var map = new google.maps.Map(document.getElementById('map'), {
-      zoom: {{city_info.map_zoom}},             // Set the initial zoom level
-      minZoom: {{city_info.map_min_zoom}},           // Minimum zoom level allowed
-      maxZoom: {{city_info.map_max_zoom}},          // Maximum zoom level allowed
+      zoom: map_zoom,             // Set the initial zoom level
+      minZoom: map_min_zoom,           // Minimum zoom level allowed
+      maxZoom:map_max_zoom,          // Maximum zoom level allowed
       center: cityCenter,
       zoomControl: true,      // Enable zoom control buttons
       //draggable: false,      // Disable map dragging (panning)

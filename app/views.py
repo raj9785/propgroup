@@ -5,6 +5,7 @@ from projects.models import Project
 from dronevideo.models import DroneVideo,DroneVideoPath
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from urllib.parse import urlparse, parse_qs
+import json
 
 
 def get_youtube_video_id(url):
@@ -95,7 +96,7 @@ def get_markers(city_id):
                 'icon':icon,
             })    
 
-    return markers    
+    return markers   
 
 
 
