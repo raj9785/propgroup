@@ -51,6 +51,7 @@ def get_zones_with_boundaries(city_id):
         zones_data.append({
             "id": str(zone.id),
             "info": zone.zone_name,
+            "name_color_code":zone.name_color_code,
             "color": color_code,
             "coords": boundary_coords
         })
@@ -138,9 +139,20 @@ def index(request):
     context['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
     context['markers'] = get_markers(city_id)
     context['drone_video_paths'] = get_drone_video_paths(city_id)
-    context['city_info'] = get_city_info(city_id)
-    
+    city_info=get_city_info(city_id)
+    context['city_info'] =city_info
+    boundry_color_code="NONE"
+    if city_info:
+        if city_info.boundry_color_code:
+            boundry_color_code=city_info.boundry_color_code
+    map_fill_color_code="NONE"
+    if city_info:
+        if city_info.map_fill_color_code:
+            map_fill_color_code=city_info.map_fill_color_code
 
+
+    context['boundry_color_code'] =boundry_color_code
+    context['map_fill_color_code'] =map_fill_color_code
 
     return render(request, 'front/home.html', context)
 

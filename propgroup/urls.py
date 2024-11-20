@@ -23,9 +23,9 @@ from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 from django.contrib.staticfiles.storage import staticfiles_storage
 
-admin.site.site_header = 'Property Group'
-admin.site.site_title = "Property Group Admin Portal"
-admin.site.index_title = "Welcome to Property Group Portal"
+admin.site.site_header = 'Prop360d'
+admin.site.site_title = "Prop360d Admin Portal"
+admin.site.index_title = "Welcome to Prop360d Portal"
 
 urlpatterns = [
     path('admin/', admin.site.urls),

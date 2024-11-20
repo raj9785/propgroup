@@ -56,6 +56,17 @@ class City(models.Model):
     sequence_number = models.IntegerField(blank=False, default=1, null=True)
     boundry_file = models.FileField(upload_to='city_boundry/',
                              verbose_name="City Boundry", null=True, blank=False,max_length=255)
+    boundry_color_code = models.CharField(max_length=7, null=True, blank=True)
+    map_fill_color_code = models.CharField(max_length=7, null=True, blank=True)
+
+    center_latitude = models.CharField(max_length=20, null=True, blank=False)
+    center_longitude = models.CharField(max_length=20, null=True, blank=False)
+
+
+    map_zoom = models.IntegerField(blank=False, default=11, null=True)
+    map_min_zoom = models.IntegerField(blank=False, default=11, null=True)
+    map_max_zoom = models.IntegerField(blank=False, default=20, null=True)
+
     is_active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -78,6 +89,7 @@ class Zone(models.Model):
         City, on_delete=models.CASCADE, null=True, blank=False, related_name='zone_city_list')
     zone_name = models.CharField(max_length=50, null=True, blank=False)
     zone_color_code = models.CharField(max_length=7, null=True, blank=True)
+    name_color_code = models.CharField(max_length=7, null=True, blank=True,default="#000000")
     sequence_number = models.IntegerField(blank=False, default=1, null=True)
     is_active = models.BooleanField(default=True)
 

@@ -8,8 +8,8 @@ class Landmark(models.Model):
         City, on_delete=models.CASCADE, null=True, blank=False, related_name='landmark_city')
     zone = models.ForeignKey(
         Zone, on_delete=models.CASCADE, null=True, blank=False, related_name='landmark_zone')
-    name = models.CharField(max_length=255,null=True, blank=False)
-    description = models.TextField(blank=True, null=True)
+    name = models.CharField(max_length=40,null=True, blank=False,verbose_name="Title")
+    description = models.TextField(blank=True, null=True,max_length=80)
     icon = models.FileField(upload_to='icons/',
                              verbose_name="Icon", null=True, blank=True,max_length=255)
     latitude = models.CharField(max_length=20, null=True, blank=False)

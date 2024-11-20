@@ -9,7 +9,7 @@
   /* Style for the fixed compass control */
   .fixed-compass {
     position: fixed;
-    top: 85px;
+    top: 125px;
     left: 5%;
     transform: translateX(-50%);
     display: flex;
@@ -141,6 +141,34 @@
   .custom-info-window_info button:hover {
     background-color: #0056b3;
   }
+
+
+  /* Style for the close button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 34px;
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: red; /* Change color on hover */
+}
+
   
+
+  /* Small devices (phones, <576px) */
+@media (max-width: 575.98px) {
+  .fixed-compass {
+   
+    left: 15%;
+   
+}
+}
+
 
   
