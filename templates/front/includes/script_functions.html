@@ -8,8 +8,35 @@
       customInfoWindow.style.display = 'none'; // Hide the custom info window
     });
   
-  
-  
+    let pathCoordinatesD = []; // Array to store clicked coordinates
+    let polylineD; // Variable to hold the polyline object
+
+    function drawPath(map) {
+            // Remove the old polyline if it exists
+            if (polylineD) {
+              polylineD.setMap(null);
+            }
+
+            // Create a new polyline
+            polylineD = new google.maps.Polyline({
+                path: pathCoordinatesD,
+                geodesic: true,
+                strokeColor: '#FF0000', // Path color
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            });
+
+            // Set the polyline on the map
+            polylineD.setMap(map);
+    }
+
+    function clearPath() {
+          if (polylineD) {
+            polylineD.setMap(null);
+          }
+          pathCoordinatesD = [];
+     }
+      
     document.addEventListener("DOMContentLoaded", function () {
       const windowHeight = window.innerHeight;
       const div = document.getElementById('map');
@@ -93,6 +120,10 @@
       
       // Coordinates for the center of the city (Gurgaon)
       var cityCenter = { lat: parseFloat('{{city_info.center_latitude}}'), lng: parseFloat('{{city_info.center_longitude}}') };
+      document.getElementById("clearPathButton").addEventListener("click", () => {
+        clearPath();
+      });
+      
       // var gurgaonBounds = {
       //   north: 28.55476998927484,  // Northern boundary
       //   south: 28.371787123082136, // Southern boundary
@@ -157,15 +188,15 @@
           console.log(`Clicked coordinates: Latitude = ${lat}, Longitude = ${lng}`);
 
           // Optionally, display a marker at the clicked location
-          new google.maps.Marker({
-              position: event.latLng,
-              map: map,
-              icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 4, // Hide the default marker icon
-              },
+          // new google.maps.Marker({
+          //     position: event.latLng,
+          //     map: map,
+          //     icon: {
+          //       path: google.maps.SymbolPath.CIRCLE,
+          //       scale: 4, // Hide the default marker icon
+          //     },
               
-          });
+          // });
 
           // Display the coordinates on the map (optional)
           // const infoWindow = new google.maps.InfoWindow({
@@ -173,6 +204,17 @@
           //     position: event.latLng,
           // });
           // infoWindow.open(map);
+
+          const clickedLocation = {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng()
+          };
+
+         // Add the new point to the path
+          pathCoordinatesD.push(clickedLocation);
+
+        // Draw or update the polyline
+          drawPath(map);
       });
   
       var polygonsData = {{ zones_with_boundaries| safe}}
