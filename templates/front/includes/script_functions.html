@@ -152,22 +152,27 @@
      
   
       map.addListener("click", (event) => {
-                const lat = event.latLng.lat(); // Latitude
-                const lng = event.latLng.lng(); // Longitude
-                console.log(`Clicked coordinates: Latitude = ${lat}, Longitude = ${lng}`);
+          const lat = event.latLng.lat(); // Latitude
+          const lng = event.latLng.lng(); // Longitude
+          console.log(`Clicked coordinates: Latitude = ${lat}, Longitude = ${lng}`);
 
-                // Optionally, display a marker at the clicked location
-                new google.maps.Marker({
-                    position: event.latLng,
-                    map: map,
-                });
+          // Optionally, display a marker at the clicked location
+          new google.maps.Marker({
+              position: event.latLng,
+              map: map,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 4, // Hide the default marker icon
+              },
+              
+          });
 
-                // Display the coordinates on the map (optional)
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`,
-                    position: event.latLng,
-                });
-                infoWindow.open(map);
+          // Display the coordinates on the map (optional)
+          // const infoWindow = new google.maps.InfoWindow({
+          //     content: `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`,
+          //     position: event.latLng,
+          // });
+          // infoWindow.open(map);
       });
   
       var polygonsData = {{ zones_with_boundaries| safe}}
