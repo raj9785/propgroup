@@ -237,7 +237,12 @@
       // Display the polygon on the map
       polygon.setMap(map);
       polygon.addListener('click', function (event) {
-        alert("Zone "+polygonData.id+" clicked");
+        //alert("Zone "+polygonData.id+" clicked");
+        $("#info_zone_name").html(polygonData.info);
+        $("#info_population").html('Population: '+polygonData.population);
+        $("#info_area").html('Area: '+polygonData.area);
+        $("#info_traffic").html('Traffic: '+polygonData.traffic);
+        $("#area_information").show();
       });
   
       // Create a dotted boundary using a polyline

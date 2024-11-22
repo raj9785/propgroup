@@ -37,6 +37,7 @@ urlpatterns = [
     path('get_video_list', views.get_video_list,name="get_video_list"),
     path('savelocationboundry', views.savelocationboundry,name="savelocationboundry"),
     path('save_drone_path_video', views.save_drone_path_video,name="save_drone_path_video"),
+    path('ajax_login', views.ajax_login, name="ajax_login"),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -93,6 +93,10 @@ class Zone(models.Model):
     sequence_number = models.IntegerField(blank=False, default=1, null=True)
     is_active = models.BooleanField(default=True)
 
+    population = models.CharField(max_length=20, null=True, blank=True,default="NULL")
+    area = models.CharField(max_length=20, null=True, blank=True,default="NULL")
+    traffic = models.CharField(max_length=20, null=True, blank=True,default="NORMAL")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

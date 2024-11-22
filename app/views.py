@@ -6,7 +6,56 @@ from dronevideo.models import DroneVideo,DroneVideoPath
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from urllib.parse import urlparse, parse_qs
 import json
+from django.contrib.auth import authenticate, logout, login as user_login
+from django.contrib.auth.hashers import make_password
 
+from django.contrib.auth.models import User
+from django.contrib.admin.models import LogEntry, ADDITION
+from django.views.decorators.csrf import csrf_exempt
+
+def ajax_login(request):
+    response_data = {}
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        if username and username:
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_superuser != 1:
+                    if user.is_active:
+                        user_login(request, user)
+                        response_data['error'] = False
+                        response_data['message'] = "Logined Successfully"
+                        response_data['class'] = "error"
+                        response_data['errors'] = ""
+
+                    else:
+                        response_data['error'] = True
+                        response_data['message'] = "Account is disabled"
+                        response_data['class'] = "success"
+                        response_data['errors'] = ""
+                else:
+                    response_data['error'] = True
+                    response_data['message'] = "Access not allowed"
+                    response_data['class'] = "error"
+                    response_data['errors'] = ""
+            else:
+                response_data['error'] = True
+                response_data['message'] = "Wrong email or password"
+                response_data['class'] = "error"
+                response_data['errors'] = ""
+        else:
+            response_data['error'] = True
+            response_data['message'] = "Enter email and password"
+            response_data['class'] = "error"
+            response_data['errors'] = ""
+    else:
+        response_data['error'] = True
+        response_data['message'] = "Access not allowed"
+        response_data['class'] = "error"
+        response_data['errors'] = ""
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 def get_youtube_video_id(url):
     parsed_url = urlparse(url)
@@ -53,6 +102,9 @@ def get_zones_with_boundaries(city_id):
             "id": str(zone.id),
             "info": zone.zone_name,
             "name_color_code":zone.name_color_code,
+            "population":zone.population,
+            "area":zone.area,
+            "traffic":zone.traffic,
             "color": color_code,
             "coords": boundary_coords
         })

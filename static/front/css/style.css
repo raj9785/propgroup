@@ -137,9 +137,28 @@
     font-size: 13px;
     cursor: pointer;
   }
+
+  .btn-primary{
+    background-color: #343A40;
+    border-color: #343A40;
+  }
+
+  .btn-primary:focus{
+    background-color: #343A40;
+    border-color: #343A40;
+  }
+
+  .btn-primary:hover{
+    background-color: #343A40;
+    border-color: #343A40;
+  }
   
   .custom-info-window_info button:hover {
     background-color: #343A40;
+  }
+
+  .messagess{
+    margin-top: 5px;
   }
 
 
