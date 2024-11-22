@@ -33,6 +33,7 @@
     function clearPath() {
           if (polylineD) {
             polylineD.setMap(null);
+            $(".controls_btn").hide();
           }
           pathCoordinatesD = [];
      }
@@ -116,7 +117,7 @@
         }
 
   
-      async function initMap() {
+  async function initMap() {
       
       // Coordinates for the center of the city (Gurgaon)
       var cityCenter = { lat: parseFloat('{{city_info.center_latitude}}'), lng: parseFloat('{{city_info.center_longitude}}') };
@@ -215,6 +216,7 @@
 
         // Draw or update the polyline
           drawPath(map);
+          $(".controls_btn").show();
       });
   
       var polygonsData = {{ zones_with_boundaries| safe}}
@@ -235,7 +237,7 @@
       // Display the polygon on the map
       polygon.setMap(map);
       polygon.addListener('click', function (event) {
-        alert("Zone "+polygonData.info+" clicked");
+        alert("Zone "+polygonData.id+" clicked");
       });
   
       // Create a dotted boundary using a polyline
@@ -310,107 +312,9 @@
       // });
     });
   
-  
-    // {%if zone_list %}
-    //       {% for zone_data in zone_list %}
-  
-  
-    var additionalMarkers = {{ markers| safe }};
-  
-    // Add each additional marker with a click event
-    additionalMarkers.forEach(function (markerData) {
-      var additionalMarker = new google.maps.Marker({
-        position: { lat: markerData.lat, lng: markerData.lng },
-        map: map,
-        title: markerData.label,
-  
-        //label: markerData.label,
-        icon: {
-          url: markerData.icon, // URL to the custom icon image
-          scaledSize: new google.maps.Size(25, 25), // Scale the icon to desired size
-          origin: new google.maps.Point(0, 0), // Origin point of the icon
-          anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
-        }
-      });
-  
-      var infoContentAdm = `
-        <div class="custom-info-window">
-          <h3>${markerData.label}</h3>
-          <p>${markerData.description}</p>
-          
-        </div>
-      `;
-  
-      var centerInfoWindowAdm = new google.maps.InfoWindow({
-        content: infoContentAdm
-      });
-  
-      additionalMarker.addListener('click', function () {
-        centerInfoWindowAdm.open(map, additionalMarker);
-      });
-  
-    });
-  
-    var paths = {{ drone_video_paths| safe }}
-  
-    // Loop through each path in the array
-    paths.forEach((pathData, index) => {
-      var pathPolyline = new google.maps.Polyline({
-        path: pathData.coordinates,
-        strokeColor: pathData.color,
-        strokeOpacity: 0,
-        strokeWeight: 5,
-        icons: [
-          {
-            icon: {
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 3,
-              fillColor: pathData.color,
-              fillOpacity: 1,
-              strokeWeight: 0,
-            },
-            offset: "0",
-            repeat: "7px",
-          },
-        ],
-        zIndex: 2099,
-      });
-  
-      // Display the polyline on the map
-      pathPolyline.setMap(map);
-  
-      // Add mouseover event for each polyline
-      google.maps.event.addListener(pathPolyline, 'mouseover', function (event) {
-        document.getElementById("customInfoWindow").style.display = "block";
-        document.getElementById("video_container").innerHTML = pathData.html_data;
-        document.getElementById("video_info").innerHTML = pathData.info;
-        document.getElementById("video_title").innerHTML = pathData.title;
-      });
-
-      google.maps.event.addListener(pathPolyline, 'click', function (event) {
-        document.getElementById("customInfoWindow").style.display = "block";
-        document.getElementById("video_container").innerHTML = pathData.html_data;
-        document.getElementById("video_info").innerHTML = pathData.info;
-        document.getElementById("video_title").innerHTML = pathData.title;
-      });
-      
-      // Add mouseout event to hide the info window when the mouse leaves the polyline
-      google.maps.event.addListener(pathPolyline, 'mouseout', function () {
-        //document.getElementById("customInfoWindow").style.display = "none";
-      });
-    });
-   
-    // Optional: Add click event to the polygon to show more info
-    // polygon.addListener('click', function (event) {
-    //   alert("Zone: {{ zone_data.zone_name }} clicked!");
-    // });
-  
-    // {% endfor %}
-    // {% endif %}
-  
-  
-  
-      // Optional: Add event listeners, e.g., for clicks or hovers
+    DrawMarker(map);
+    DrawPath(map);
+    // Optional: Add event listeners, e.g., for clicks or hovers
       // map.data.addListener('click', function (event) {
       //   document.getElementById("customInfoWindow").style.display = "none";
       // });
@@ -419,6 +323,92 @@
       
   
   
+    }
+
+    function DrawMarker(map){
+            var additionalMarkers = {{ markers| safe }};
+            // Add each additional marker with a click event
+            additionalMarkers.forEach(function (markerData) {
+              var additionalMarker = new google.maps.Marker({
+                position: { lat: markerData.lat, lng: markerData.lng },
+                map: map,
+                title: markerData.label,
+                //label: markerData.label,
+                icon: {
+                  url: markerData.icon, // URL to the custom icon image
+                  scaledSize: new google.maps.Size(25, 25), // Scale the icon to desired size
+                  origin: new google.maps.Point(0, 0), // Origin point of the icon
+                  anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
+                }
+              });
+
+              var infoContentAdm = `
+                <div class="custom-info-window">
+                  <h3>${markerData.label}</h3>
+                  <p>${markerData.description}</p>
+                  
+                </div>
+              `;
+
+              var centerInfoWindowAdm = new google.maps.InfoWindow({
+                content: infoContentAdm
+              });
+
+              additionalMarker.addListener('click', function () {
+                centerInfoWindowAdm.open(map, additionalMarker);
+              });
+
+            });
+
+    }
+
+    function DrawPath(map){
+        var paths =  {{ drone_video_paths| safe }}
+        paths.forEach((pathData, index) => {
+          var pathPolyline = new google.maps.Polyline({
+            path: pathData.coordinates,
+            strokeColor: pathData.color,
+            strokeOpacity: 0,
+            strokeWeight: 5,
+            icons: [
+              {
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 3,
+                  fillColor: pathData.color,
+                  fillOpacity: 1,
+                  strokeWeight: 0,
+                },
+                offset: "0",
+                repeat: "7px",
+              },
+            ],
+            zIndex: 2099,
+        });
+      
+          // Display the polyline on the map
+        pathPolyline.setMap(map);
+
+        // Add mouseover event for each polyline
+        google.maps.event.addListener(pathPolyline, 'mouseover', function (event) {
+          document.getElementById("customInfoWindow").style.display = "block";
+          document.getElementById("video_container").innerHTML = pathData.html_data;
+          document.getElementById("video_info").innerHTML = pathData.info;
+          document.getElementById("video_title").innerHTML = pathData.title;
+        });
+
+        google.maps.event.addListener(pathPolyline, 'click', function (event) {
+          document.getElementById("customInfoWindow").style.display = "block";
+          document.getElementById("video_container").innerHTML = pathData.html_data;
+          document.getElementById("video_info").innerHTML = pathData.info;
+          document.getElementById("video_title").innerHTML = pathData.title;
+        });
+        
+        // Add mouseout event to hide the info window when the mouse leaves the polyline
+        google.maps.event.addListener(pathPolyline, 'mouseout', function () {
+          //document.getElementById("customInfoWindow").style.display = "none";
+        });
+      });
     }
   
     function openInfoWindow(id, type) {
