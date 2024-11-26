@@ -30,7 +30,7 @@ admin.site.index_title = "Welcome to Prop360d Portal"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name="index"),
-    path('leafletjs', views.leafletjs, name="leafletjs"),
+    path('dashboard', views.dashboard, name="dashboard"),
     path('zone_list', views.zone_list,name="zone_list"),
     path('saveroute', views.saveroute,name="saveroute"),
     path('location_list', views.location_list,name="location_list"),
@@ -38,6 +38,14 @@ urlpatterns = [
     path('savelocationboundry', views.savelocationboundry,name="savelocationboundry"),
     path('save_drone_path_video', views.save_drone_path_video,name="save_drone_path_video"),
     path('ajax_login', views.ajax_login, name="ajax_login"),
-]
+    path('ajax_verify_otp', views.ajax_verify_otp, name="ajax_verify_otp"),
+    path('ajax_send_otp', views.ajax_send_otp, name="ajax_send_otp"),
+    path('ajax_register', views.ajax_register, name="ajax_register"),
+    path('ajax_polygons', views.ajax_polygons, name="ajax_polygons"),
+    path('ajax_location_polygons', views.ajax_location_polygons, name="ajax_location_polygons"),
+    path('ajax_get_markers', views.ajax_get_markers, name="ajax_get_markers"),
+    path('ajax_drone_video_paths', views.ajax_drone_video_paths, name="ajax_drone_video_paths"),
+    path('logout', views.logout_view, name = 'logout'), 
+] 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

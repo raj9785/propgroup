@@ -129,6 +129,11 @@ class Location(models.Model):
     zone = models.ForeignKey(
         Zone, on_delete=models.CASCADE, null=True, blank=False, related_name='location_zone_list')
     location_name = models.CharField(max_length=50, null=True, blank=False)
+    boundry_color_code = models.CharField(max_length=7, null=True, blank=False,default="#000000")
+    fill_color_code = models.CharField(max_length=7, null=True, blank=True)
+    name_color_code = models.CharField(max_length=7, null=True, blank=True,default="#000000")
+
+
     sequence_number = models.IntegerField(blank=False, default=1, null=True)
     is_active = models.BooleanField(default=True)
 
@@ -155,3 +160,32 @@ class LocationBoundry(models.Model):
         verbose_name = "Location Boundry"
         verbose_name_plural = "Location Boundries"
         unique_together = ('location','latitude','longitude')
+
+
+class MobileOtp(models.Model):
+    mobile = models.CharField(max_length=10,
+                              null=True, blank=False)
+    otp = models.CharField(max_length=4,
+                           null=True, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expired_at = models.DateTimeField(null=True, blank=False)
+    return_to = models.CharField(max_length=255,
+                                 null=True, blank=True)
+
+    def __str__(self):
+        return self.mobile
+
+
+class TempUser(models.Model):
+    mobile = models.CharField(max_length=10,
+                              null=True, blank=False)
+    name = models.CharField(max_length=50,
+                            null=True, blank=True)
+    email = models.CharField(max_length=100,
+                             null=True, blank=True)
+    password = models.CharField(max_length=100,
+                                null=True, blank=True)
+
+    def __str__(self):
+        return self.mobile
+

@@ -1,230 +1,306 @@
 <script>
-      // Get the close button and custom info window
-    const closeButton_Info = document.getElementById('closeInfoWindow');
-    const customInfoWindow = document.getElementById('customInfoWindow');
-    
-    // Add click event to close the info window
-    closeButton_Info.addEventListener('click', () => {
-      customInfoWindow.style.display = 'none'; // Hide the custom info window
-    });
-  
-    let pathCoordinatesD = []; // Array to store clicked coordinates
-    let polylineD; // Variable to hold the polyline object
+  // Get the close button and custom info window
+  const closeButton_Info = document.getElementById('closeInfoWindow');
+  const customInfoWindow = document.getElementById('customInfoWindow');
+  const page_name = '{{page_name}}';
 
-    function drawPath(map) {
-            // Remove the old polyline if it exists
-            if (polylineD) {
-              polylineD.setMap(null);
-            }
+  // Add click event to close the info window
+  closeButton_Info.addEventListener('click', () => {
+    customInfoWindow.style.display = 'none'; // Hide the custom info window
+  });
 
-            // Create a new polyline
-            polylineD = new google.maps.Polyline({
-                path: pathCoordinatesD,
-                geodesic: true,
-                strokeColor: '#FF0000', // Path color
-                strokeOpacity: 1.0,
-                strokeWeight: 2
-            });
+  let pathCoordinatesD = []; // Array to store clicked coordinates
+  let polylineD; // Variable to hold the polyline object
+  let markers = []; // Array to store markers
 
-            // Set the polyline on the map
-            polylineD.setMap(map);
+  function drawPath(map) {
+    // Remove the old polyline if it exists
+    if (polylineD) {
+      polylineD.setMap(null);
     }
 
-    function clearPath() {
-          if (polylineD) {
-            polylineD.setMap(null);
-            $(".controls_btn").hide();
-          }
-          pathCoordinatesD = [];
-     }
-      
-    document.addEventListener("DOMContentLoaded", function () {
-      const windowHeight = window.innerHeight;
-      const div = document.getElementById('map');
-      div.style.height = `${window.innerHeight - 100}px`;
+    // Create a new polyline
+    polylineD = new google.maps.Polyline({
+      path: pathCoordinatesD,
+      geodesic: true,
+      strokeColor: '#FF0000', // Path color
+      strokeOpacity: 1.0,
+      strokeWeight: 2
     });
-  
-    function getPolygonCenter(coords) {
-        var latSum = 0;
-        var lngSum = 0;
-        coords.forEach(function(coord) {
-          latSum += coord.lat;
-          lngSum += coord.lng;
-        });
-        return {
-          lat: latSum / coords.length,
-          lng: lngSum / coords.length
-        };
+
+    // Set the polyline on the map
+    polylineD.setMap(map);
+  }
+
+  function clearPath() {
+    for (let marker of markers) {
+      marker.setMap(null);
+    }
+    markers = [];
+
+
+    if (polylineD) {
+      polylineD.setMap(null);
+      $(".controls_btn").hide();
+    }
+    pathCoordinatesD = [];
+    drawPath(map);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const windowHeight = window.innerHeight;
+    const div = document.getElementById('map');
+    div.style.height = `${window.innerHeight - 100}px`;
+  });
+
+  function getPolygonCenter(coords) {
+    var latSum = 0;
+    var lngSum = 0;
+    coords.forEach(function (coord) {
+      latSum += coord.lat;
+      lngSum += coord.lng;
+    });
+    return {
+      lat: latSum / coords.length,
+      lng: lngSum / coords.length
+    };
+  }
+
+  $(document).ready(function () {
+    initMap();
+    $("#clearPathButton").on("click", function () {
+      clearPath();
+    });
+  });
+
+
+  async function fetchGeoJSON(url) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to load GeoJSON: ${response.statusText}`);
       }
-    
-      $(document).ready(function() {
-        initMap();
-      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching GeoJSON:', error);
+      return null;
+    }
+  }
+
+  function createPolygon(coordinates, map) {
+    var boundry_color_code = '{{boundry_color_code}}';
+
+    if (boundry_color_code == "NONE") {
+      var strokeColor = ""
+      var strokeOpacity = 0
+    } else {
+      var strokeColor = boundry_color_code
+      var strokeOpacity = 0.8
+    }
+    var map_fill_color_code = '{{map_fill_color_code}}';
+    if (map_fill_color_code == "NONE") {
+      var fillColor = ""
+      var fillOpacity = 0
+    } else {
+      var fillColor = map_fill_color_code
+      var fillOpacity = 0.35
+    }
 
 
-      async function fetchGeoJSON(url) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`Failed to load GeoJSON: ${response.statusText}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error('Error fetching GeoJSON:', error);
-                return null;
-            }
-        }
 
-        function createPolygon(coordinates, map) {
-           var boundry_color_code='{{boundry_color_code}}';
-      
-            if(boundry_color_code=="NONE"){
-              var strokeColor = ""
-              var strokeOpacity = 0
-            }else{
-              var strokeColor = boundry_color_code
-              var strokeOpacity = 0.8
-            }
-            var map_fill_color_code='{{map_fill_color_code}}';
-            if(map_fill_color_code=="NONE"){
-              var fillColor = ""
-              var fillOpacity = 0
-            }else{
-              var fillColor = map_fill_color_code
-              var fillOpacity = 0.35 
-            }
-        
-        
-          
 
-            const paths = coordinates.map(coord => ({
-                lat: coord[1],
-                lng: coord[0]
-            }));
+    const paths = coordinates.map(coord => ({
+      lat: coord[1],
+      lng: coord[0]
+    }));
 
-            // Create and display the polygon
-            const polygonMap = new google.maps.Polygon({
-                paths,
-                strokeColor: boundry_color_code,
-                strokeOpacity:strokeOpacity,
-                strokeWeight: 2,
-                fillColor: fillColor,
-                fillOpacity: fillOpacity,
-                clickable: false 
-            });
+    // Create and display the polygon
+    const polygonMap = new google.maps.Polygon({
+      paths,
+      strokeColor: boundry_color_code,
+      strokeOpacity: strokeOpacity,
+      strokeWeight: 2,
+      fillColor: fillColor,
+      fillOpacity: fillOpacity,
+      clickable: false
+    });
 
-            polygonMap.setMap(map);
-        }
+    polygonMap.setMap(map);
+  }
 
-  
+
   async function initMap() {
-      
-      // Coordinates for the center of the city (Gurgaon)
-      var cityCenter = { lat: parseFloat('{{city_info.center_latitude}}'), lng: parseFloat('{{city_info.center_longitude}}') };
-      document.getElementById("clearPathButton").addEventListener("click", () => {
-        clearPath();
-      });
-      
-      // var gurgaonBounds = {
-      //   north: 28.55476998927484,  // Northern boundary
-      //   south: 28.371787123082136, // Southern boundary
-      //   west: 76.94973515874823,   // Western boundary
-      //   east: 77.13974236261555    // Eastern boundary
-      // };
-      // Create the map, centered on the city
-      map_zoom=parseInt('{{city_info.map_zoom}}');
-      map_min_zoom=parseInt('{{city_info.map_min_zoom}}');
-      map_max_zoom=parseInt('{{city_info.map_max_zoom}}');
-      var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: map_zoom,             // Set the initial zoom level
-        minZoom: map_min_zoom,           // Minimum zoom level allowed
-        maxZoom:map_max_zoom,          // Maximum zoom level allowed
-        center: cityCenter,
-        zoomControl: true, 
-        clickable: true,
-        //draggable: false,      // Disable map dragging (panning)
-        //gestureHandling: 'none', // Disable zoom by mouse wheel or gesture
-        //disableDefaultUI: true,  // Dis
-  
-        // restriction: {
-        //     latLngBounds: gurgaonBounds,  // Restrict to Gurgaon bounds
-        //     strictBounds: true            // Prevent movement outside of bounds
-        // }
-        // restriction: {
-        //     latLngBounds: { 
-        //         north: 28.55476998927484,  // Northern boundary
-        //         south: 28.371787123082136, // Southern boundary
-        //         west: 76.94973515874823,   // Western boundary
-        //         east: 77.13974236261555    // Eastern boundary
-        //     },
-        //     strictBounds: true
-        // }
-      });
-  
-      // Load the GeoJSON file
-     // map.data.loadGeoJson('{{city_info.boundry_file.url}}');
 
-     // Load the GeoJSON file
-             
-      const geojson = await fetchGeoJSON('{{city_info.boundry_file.url}}');
-      if (!geojson) return;
+    // Coordinates for the center of the city (Gurgaon)
+    var cityCenter = { lat: parseFloat('{{city_info.center_latitude}}'), lng: parseFloat('{{city_info.center_longitude}}') };
 
-      geojson.features.forEach((feature) => {
-          const { type } = feature.geometry;
 
-          if (type === "Polygon") {
-              createPolygon(feature.geometry.coordinates[0], map);
-          } else if (type === "MultiPolygon") {
-              feature.geometry.coordinates.forEach(polygonCoords => {
-                  createPolygon(polygonCoords[0], map);
-              });
-          }
-      });
+    // var gurgaonBounds = {
+    //   north: 28.55476998927484,  // Northern boundary
+    //   south: 28.371787123082136, // Southern boundary
+    //   west: 76.94973515874823,   // Western boundary
+    //   east: 77.13974236261555    // Eastern boundary
+    // };
+    // Create the map, centered on the city
+    map_zoom = parseInt('{{city_info.map_zoom}}');
+    map_min_zoom = parseInt('{{city_info.map_min_zoom}}');
+    map_max_zoom = parseInt('{{city_info.map_max_zoom}}');
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: map_zoom,             // Set the initial zoom level
+      minZoom: map_min_zoom,           // Minimum zoom level allowed
+      maxZoom: map_max_zoom,          // Maximum zoom level allowed
+      center: cityCenter,
+      zoomControl: true,
+      clickable: true,
+      //draggable: false,      // Disable map dragging (panning)
+      //gestureHandling: 'none', // Disable zoom by mouse wheel or gesture
+      //disableDefaultUI: true,  // Dis
 
-     
-  
-      map.addListener("click", (event) => {
-          const lat = event.latLng.lat(); // Latitude
-          const lng = event.latLng.lng(); // Longitude
-          console.log(`Clicked coordinates: Latitude = ${lat}, Longitude = ${lng}`);
+      // restriction: {
+      //     latLngBounds: gurgaonBounds,  // Restrict to Gurgaon bounds
+      //     strictBounds: true            // Prevent movement outside of bounds
+      // }
+      // restriction: {
+      //     latLngBounds: { 
+      //         north: 28.55476998927484,  // Northern boundary
+      //         south: 28.371787123082136, // Southern boundary
+      //         west: 76.94973515874823,   // Western boundary
+      //         east: 77.13974236261555    // Eastern boundary
+      //     },
+      //     strictBounds: true
+      // }
+    });
 
-          // Optionally, display a marker at the clicked location
-          // new google.maps.Marker({
-          //     position: event.latLng,
-          //     map: map,
-          //     icon: {
-          //       path: google.maps.SymbolPath.CIRCLE,
-          //       scale: 4, // Hide the default marker icon
-          //     },
-              
-          // });
+    // Load the GeoJSON file
+    // map.data.loadGeoJson('{{city_info.boundry_file.url}}');
 
-          // Display the coordinates on the map (optional)
-          // const infoWindow = new google.maps.InfoWindow({
-          //     content: `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`,
-          //     position: event.latLng,
-          // });
-          // infoWindow.open(map);
+    // Load the GeoJSON file
 
-          const clickedLocation = {
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng()
-          };
+    const geojson = await fetchGeoJSON('{{city_info.boundry_file.url}}');
+    if (!geojson) return;
 
-         // Add the new point to the path
-          pathCoordinatesD.push(clickedLocation);
+    geojson.features.forEach((feature) => {
+      const { type } = feature.geometry;
+
+      if (type === "Polygon") {
+        createPolygon(feature.geometry.coordinates[0], map);
+      } else if (type === "MultiPolygon") {
+        feature.geometry.coordinates.forEach(polygonCoords => {
+          createPolygon(polygonCoords[0], map);
+        });
+      }
+    });
+
+    map.addListener("click", (event) => {
+      const lat = event.latLng.lat(); // Latitude
+      const lng = event.latLng.lng(); // Longitude
+      console.log(`Clicked coordinates: Latitude = ${lat}, Longitude = ${lng}`);
+      // Display the coordinates on the map (optional)
+      // const infoWindow = new google.maps.InfoWindow({
+      //     content: `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`,
+      //     position: event.latLng,
+      // });
+      // infoWindow.open(map);
+      if (page_name == "dashboard") {
+
+        // Optionally, display a marker at the clicked location
+        const marker_clicked = new google.maps.Marker({
+          position: event.latLng,
+          map: map,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 2, // Hide the default marker icon
+          },
+        });
+
+        // Store the marker in the array
+        markers.push(marker_clicked);
+        const clickedLocation = {
+          lat: event.latLng.lat(),
+          lng: event.latLng.lng()
+        };
+
+        // Add the new point to the path
+        pathCoordinatesD.push(clickedLocation);
 
         // Draw or update the polyline
-          drawPath(map);
-          $(".controls_btn").show();
+        drawPath(map);
+        $(".controls_btn").show();
+      }
+
+    });
+
+
+    DrawPolyzon(map, 1)
+    DrawMarker(map);
+    DrawPath(map);
+    // Optional: Add event listeners, e.g., for clicks or hovers
+    // map.data.addListener('click', function (event) {
+    //   document.getElementById("customInfoWindow").style.display = "none";
+    // });
+  }
+
+  let polygonslocations = [];
+  function DrawLocationPolygons(map, currentZoom) {
+    polygonslocations.forEach(polygon => {
+      polygon.setMap(null); // Remove each polygon from the map
+    });
+    polygonslocations = []; // Clear the array
+
+    if (currentZoom > 12) {
+      $.ajax({
+        url: "{% url 'ajax_location_polygons' %}",
+        type: "get",
+        data: {
+          "city_id": "{{city_id}}"
+        },
+        dataType: "json",
+        cache: false,
+        contentType: false,
+        beforeSend: function () {
+
+        },
+        success: function (data) {
+          if (data.location_with_boundaries) {
+            polygonsData = data.location_with_boundaries;
+            polygonsData.forEach((polygonData, index) => {
+              var fillOpacity = polygonData.fill_color_code ? 0.35 : 0;
+              console.log(fillOpacity);
+              var polygon = new google.maps.Polygon({
+                paths: polygonData.coords,
+                strokeColor: polygonData.boundry_color_code,
+                strokeOpacity: 1,
+                strokeWeight: 2,
+                fillColor: polygonData.fill_color_code,
+                fillOpacity: fillOpacity,
+                clickable: true,
+              });
+              // Display the polygon on the map
+              polygon.setMap(map);
+              polygonslocations.push(polygon); // Store reference
+
+            });
+          }
+        },
       });
-  
-      var polygonsData = {{ zones_with_boundaries| safe}}
-  
-    // Loop through each polygon data and create a polygon
+
+    }
+
+  }
+
+  // Global variable to hold the polygon(s)
+  let polygons = []; // Array to manage multiple polygons
+  // Function to draw polygons
+  function DrawZonePolygons(map, data) {
+    polygonsData = data.zones_with_boundaries;
+    polygons.forEach(polygon => {
+      polygon.setMap(null); // Remove each polygon from the map
+    });
+    polygons = []; // Clear the array
+
     polygonsData.forEach((polygonData, index) => {
       var fillOpacity = polygonData.color ? 0.35 : 0;
-  
+
       var polygon = new google.maps.Polygon({
         paths: polygonData.coords,
         strokeColor: polygonData.color,
@@ -236,42 +312,39 @@
       });
       // Display the polygon on the map
       polygon.setMap(map);
+      polygons.push(polygon); // Store reference
       polygon.addListener('click', function (event) {
         //alert("Zone "+polygonData.id+" clicked");
         $("#info_zone_name").html(polygonData.info);
-        $("#info_population").html('Population: '+polygonData.population);
-        $("#info_area").html('Area: '+polygonData.area);
-        $("#info_traffic").html('Traffic: '+polygonData.traffic);
+        $("#info_population").html('Population: ' + polygonData.population);
+        $("#info_area").html('Area: ' + polygonData.area);
+        $("#info_traffic").html('Traffic: ' + polygonData.traffic);
         $("#area_information").show();
       });
-  
+
       // Create a dotted boundary using a polyline
       var dottedLine = new google.maps.Polyline({
-          path: polygonData.coords, // Same path as the polygon
-          strokeColor: polygonData.color,
-          strokeOpacity: 0.7,
-          strokeWeight: 1,
-          clickable: true,
-          icons: [
-            {
-              icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 1, // Size of the dots
-              },
-              offset: "0",
-              repeat: "5px" // Spacing between dots
-            }
-          ]
-        });
-  
-        // Add the polyline to the map
+        path: polygonData.coords, // Same path as the polygon
+        strokeColor: polygonData.color,
+        strokeOpacity: 0.7,
+        strokeWeight: 1,
+        clickable: true,
+        icons: [
+          {
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 1, // Size of the dots
+            },
+            offset: "0",
+            repeat: "5px" // Spacing between dots
+          }
+        ]
+      });
+
+      // Add the polyline to the map
       dottedLine.setMap(map);
-      
-  
-  
-        
       var polygonCenter = getPolygonCenter(polygonData.coords);
-      var name_color_code=polygonData.name_color_code?polygonData.name_color_code:"#000000";
+      var name_color_code = polygonData.name_color_code ? polygonData.name_color_code : "#000000";
       var centerMarker = new google.maps.Marker({
         position: polygonCenter,
         map: map,
@@ -281,31 +354,32 @@
           scale: 0, // Hide the default marker icon
         },
         label: {
-            text:polygonData.info, // Replace with your label text
-            color: name_color_code, // Label text color
-            fontSize: "20px", // Adjust the font size
-            fontWeight: "bold",
+          text: polygonData.info, // Replace with your label text
+          color: name_color_code, // Label text color
+          fontSize: "20px", // Adjust the font size
+          fontWeight: "bold",
         },
       });
-  
+
       map.addListener("zoom_changed", () => {
-          const currentZoom = map.getZoom(); // Get the current zoom level
-          console.log(currentZoom);
-          if (currentZoom <= 12) {
-            centerMarker.setVisible(true); // Show marker at zoom level 15 or above
-            polygon.setOptions({
-              fillColor: polygonData.color,
-              fillOpacity: fillOpacity,
-            });
-          } else {
-            centerMarker.setVisible(false); // Hide marker at zoom level below 15
-            polygon.setOptions({
-              fillOpacity: 0,
-            });
-          }
+        const currentZoom = map.getZoom(); // Get the current zoom level
+        console.log(currentZoom);
+        DrawLocationPolygons(map, currentZoom);
+        if (currentZoom <= 12) {
+          centerMarker.setVisible(true); // Show marker at zoom level 15 or above
+          polygon.setOptions({
+            fillColor: polygonData.color,
+            fillOpacity: fillOpacity,
+          });
+        } else {
+          centerMarker.setVisible(false); // Hide marker at zoom level below 15
+          polygon.setOptions({
+            fillOpacity: 0,
+          });
+        }
       });
-      
-  
+
+
       // Add a click event to each polygon
       // google.maps.event.addListener(polygon, 'click', function (event) {
       //   // Open an InfoWindow or perform any other action here
@@ -316,38 +390,62 @@
       //   infoWindow.open(map);
       // });
     });
-  
-    DrawMarker(map);
-    DrawPath(map);
-    // Optional: Add event listeners, e.g., for clicks or hovers
-      // map.data.addListener('click', function (event) {
-      //   document.getElementById("customInfoWindow").style.display = "none";
-      // });
-  
-      
-      
-  
-  
-    }
+  }
 
-    function DrawMarker(map){
-            var additionalMarkers = {{ markers| safe }};
-            // Add each additional marker with a click event
-            additionalMarkers.forEach(function (markerData) {
-              var additionalMarker = new google.maps.Marker({
-                position: { lat: markerData.lat, lng: markerData.lng },
-                map: map,
-                title: markerData.label,
-                //label: markerData.label,
-                icon: {
-                  url: markerData.icon, // URL to the custom icon image
-                  scaledSize: new google.maps.Size(25, 25), // Scale the icon to desired size
-                  origin: new google.maps.Point(0, 0), // Origin point of the icon
-                  anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
-                }
-              });
+  function DrawPolyzon(map, level) {
 
-              var infoContentAdm = `
+    // var polygonsData = {{ zones_with_boundaries| safe}}
+    $.ajax({
+      url: "{% url 'ajax_polygons' %}",
+      type: "get",
+      data: {
+        "level": level,
+        "city_id": "{{city_id}}"
+      },
+      dataType: "json",
+      cache: false,
+      contentType: false,
+      beforeSend: function () {
+
+      },
+      success: function (data) {
+
+        DrawZonePolygons(map, data)
+      },
+    });
+  }
+
+  function DrawMarker(map) {
+    $.ajax({
+      url: "{% url 'ajax_get_markers' %}",
+      type: "get",
+      data: {
+        "city_id": "{{city_id}}"
+      },
+      dataType: "json",
+      cache: false,
+      contentType: false,
+      beforeSend: function () {
+
+      },
+      success: function (data) {
+        var additionalMarkers = data.markers;
+        // Add each additional marker with a click event
+        additionalMarkers.forEach(function (markerData) {
+          var additionalMarker = new google.maps.Marker({
+            position: { lat: markerData.lat, lng: markerData.lng },
+            map: map,
+            title: markerData.label,
+            //label: markerData.label,
+            icon: {
+              url: markerData.icon, // URL to the custom icon image
+              scaledSize: new google.maps.Size(25, 25), // Scale the icon to desired size
+              origin: new google.maps.Point(0, 0), // Origin point of the icon
+              anchor: new google.maps.Point(15, 15) // Anchor point of the icon (centered)
+            }
+          });
+
+          var infoContentAdm = `
                 <div class="custom-info-window">
                   <h3>${markerData.label}</h3>
                   <p>${markerData.description}</p>
@@ -355,20 +453,35 @@
                 </div>
               `;
 
-              var centerInfoWindowAdm = new google.maps.InfoWindow({
-                content: infoContentAdm
-              });
+          var centerInfoWindowAdm = new google.maps.InfoWindow({
+            content: infoContentAdm
+          });
 
-              additionalMarker.addListener('click', function () {
-                centerInfoWindowAdm.open(map, additionalMarker);
-              });
+          additionalMarker.addListener('click', function () {
+            centerInfoWindowAdm.open(map, additionalMarker);
+          });
 
-            });
+        });
 
-    }
+      },
+    });
+  }
 
-    function DrawPath(map){
-        var paths =  {{ drone_video_paths| safe }}
+  function DrawPath(map) {
+    $.ajax({
+      url: "{% url 'ajax_drone_video_paths' %}",
+      type: "get",
+      data: {
+        "city_id": "{{city_id}}"
+      },
+      dataType: "json",
+      cache: false,
+      contentType: false,
+      beforeSend: function () {
+
+      },
+      success: function (data) {
+        var paths = data.drone_video_paths;
         paths.forEach((pathData, index) => {
           var pathPolyline = new google.maps.Polyline({
             path: pathData.coordinates,
@@ -389,34 +502,37 @@
               },
             ],
             zIndex: 2099,
-        });
-      
+          });
+
           // Display the polyline on the map
-        pathPolyline.setMap(map);
+          pathPolyline.setMap(map);
 
-        // Add mouseover event for each polyline
-        google.maps.event.addListener(pathPolyline, 'mouseover', function (event) {
-          document.getElementById("customInfoWindow").style.display = "block";
-          document.getElementById("video_container").innerHTML = pathData.html_data;
-          document.getElementById("video_info").innerHTML = pathData.info;
-          document.getElementById("video_title").innerHTML = pathData.title;
+          // Add mouseover event for each polyline
+          google.maps.event.addListener(pathPolyline, 'mouseover', function (event) {
+            document.getElementById("customInfoWindow").style.display = "block";
+            document.getElementById("video_container").innerHTML = pathData.html_data;
+            document.getElementById("video_info").innerHTML = pathData.info;
+            document.getElementById("video_title").innerHTML = pathData.title;
+          });
+
+          google.maps.event.addListener(pathPolyline, 'click', function (event) {
+            document.getElementById("customInfoWindow").style.display = "block";
+            document.getElementById("video_container").innerHTML = pathData.html_data;
+            document.getElementById("video_info").innerHTML = pathData.info;
+            document.getElementById("video_title").innerHTML = pathData.title;
+          });
+
+          // Add mouseout event to hide the info window when the mouse leaves the polyline
+          google.maps.event.addListener(pathPolyline, 'mouseout', function () {
+            //document.getElementById("customInfoWindow").style.display = "none";
+          });
         });
 
-        google.maps.event.addListener(pathPolyline, 'click', function (event) {
-          document.getElementById("customInfoWindow").style.display = "block";
-          document.getElementById("video_container").innerHTML = pathData.html_data;
-          document.getElementById("video_info").innerHTML = pathData.info;
-          document.getElementById("video_title").innerHTML = pathData.title;
-        });
-        
-        // Add mouseout event to hide the info window when the mouse leaves the polyline
-        google.maps.event.addListener(pathPolyline, 'mouseout', function () {
-          //document.getElementById("customInfoWindow").style.display = "none";
-        });
-      });
-    }
-  
-    function openInfoWindow(id, type) {
-      document.getElementById("customInfoWindow").style.display = "block";
-    }
-  </script>
+      },
+    });
+  }
+
+  function openInfoWindow(id, type) {
+    document.getElementById("customInfoWindow").style.display = "block";
+  }
+</script>

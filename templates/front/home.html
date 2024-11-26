@@ -1,5 +1,6 @@
 {% extends "front/base.html" %}{% block content %} {% load static %}
-<!-- Compass Control Positioned at the Top of the Page with N, E, S, W -->
+
+
 <div class="fixed-compass">
   <div class="compass-direction north">N</div>
   <div class="compass-direction east">E</div>
@@ -8,11 +9,15 @@
   <div class="compass-inner" id="compass">•</div> <!-- Inner circle for rotation -->
   
 </div>
+{% if page_name == "dashboard" %}
 <div id="controls" class="controls_btn" style="display: none;">
   <button class="btn btn-secondary" id="clearPathButton">Clear Path</button>
 </div>
+{%endif%}
+<div id="map" style="height: 600px;"></div>
 
-<div id="map" style="height: 600px; position: relative;"></div>
+
+
 <div class="area_information" id="area_information" style="display: none;">
   <div class="container">
     <div class="row">
@@ -38,6 +43,7 @@
     
   </div>
 </div>
+
 <div id="customInfoWindow" class="custom-info-window_info" style="display: none;">
   <h3>Information</h3>
   <button id="closeInfoWindow" class="close-btn">&times;</button> 

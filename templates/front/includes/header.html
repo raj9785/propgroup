@@ -15,9 +15,19 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Services</a>
                 </li>
+                {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a  class="nav-link" href="javascript:void(0)" data-toggle="modal" data-target="#authModal">Login</a>
+                   <a class="nav-link" href='/dashboard'> Dashboard</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href={% url 'logout' %} > Logout</a>
+                </li>
+                
+                {%else%}
+                <li class="nav-item">
+                   <a  class="nav-link" href="javascript:void(0)" data-toggle="modal" data-target="#authModal">Login</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
