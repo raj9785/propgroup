@@ -3,7 +3,7 @@
   const closeButton_Info = document.getElementById('closeInfoWindow');
   const customInfoWindow = document.getElementById('customInfoWindow');
   const page_name = '{{page_name}}';
-
+  let centerMarker_loc;
   // Add click event to close the info window
   closeButton_Info.addEventListener('click', () => {
     customInfoWindow.style.display = 'none'; // Hide the custom info window
@@ -12,6 +12,17 @@
   let pathCoordinatesD = []; // Array to store clicked coordinates
   let polylineD; // Variable to hold the polyline object
   let markers = []; // Array to store markers
+  let markers_loc = []; // Array to store markers
+  let map_edit=false;
+  let action_type="";
+  let currentZoomVar=11;
+  let map;
+  function take_action(action_id){
+    action_type=action_id;
+    map_edit=true;
+    map.setZoom(13);   
+    clearPath();              // Sets the zoom level to 14
+   }
 
   function drawPath(map) {
     // Remove the old polyline if it exists
@@ -71,8 +82,29 @@
     $("#clearPathButton").on("click", function () {
       clearPath();
     });
+    get_drone_video();
   });
+  
+  function get_drone_video(){
+    $.ajax({
+      url: "{% url 'ajax_get_video_list' %}",
+      type: "get",
+      data: {
+        "city_id": "{{city_id}}"
+      },
+      dataType: "json",
+      cache: false,
+      contentType: false,
+      beforeSend: function () {
 
+      },
+      success: function (data) {
+        $("#dynamic_content").html(data.video_list);
+        
+      },
+    });
+
+  }
 
   async function fetchGeoJSON(url) {
     try {
@@ -126,11 +158,15 @@
     });
 
     polygonMap.setMap(map);
+
+
+
+
   }
 
 
   async function initMap() {
-
+    
     // Coordinates for the center of the city (Gurgaon)
     var cityCenter = { lat: parseFloat('{{city_info.center_latitude}}'), lng: parseFloat('{{city_info.center_longitude}}') };
 
@@ -145,7 +181,7 @@
     map_zoom = parseInt('{{city_info.map_zoom}}');
     map_min_zoom = parseInt('{{city_info.map_min_zoom}}');
     map_max_zoom = parseInt('{{city_info.map_max_zoom}}');
-    var map = new google.maps.Map(document.getElementById('map'), {
+     map = new google.maps.Map(document.getElementById('map'), {
       zoom: map_zoom,             // Set the initial zoom level
       minZoom: map_min_zoom,           // Minimum zoom level allowed
       maxZoom: map_max_zoom,          // Maximum zoom level allowed
@@ -170,7 +206,7 @@
       //     strictBounds: true
       // }
     });
-
+   
     // Load the GeoJSON file
     // map.data.loadGeoJson('{{city_info.boundry_file.url}}');
 
@@ -201,37 +237,45 @@
       //     position: event.latLng,
       // });
       // infoWindow.open(map);
-      if (page_name == "dashboard") {
+      if (page_name == "dashboard" && map_edit==true) {
+          if(action_type!="3"){
+            clearPath();
+            var icon_path={
+              
+            }
+          }else{
+            var icon_path={
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 2, // Hide the default marker icon
+            }
+          }
+         
+          const marker_clicked = new google.maps.Marker({
+            position: event.latLng,
+            map: map,
+            icon:icon_path,
+          });
 
-        // Optionally, display a marker at the clicked location
-        const marker_clicked = new google.maps.Marker({
-          position: event.latLng,
-          map: map,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 2, // Hide the default marker icon
-          },
-        });
+          // Store the marker in the array
+          markers.push(marker_clicked);
+          const clickedLocation = {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng()
+          };
 
-        // Store the marker in the array
-        markers.push(marker_clicked);
-        const clickedLocation = {
-          lat: event.latLng.lat(),
-          lng: event.latLng.lng()
-        };
-
-        // Add the new point to the path
-        pathCoordinatesD.push(clickedLocation);
-
-        // Draw or update the polyline
-        drawPath(map);
-        $(".controls_btn").show();
+          // Add the new point to the path
+           pathCoordinatesD.push(clickedLocation);
+          
+          // Draw or update the polyline
+          drawPath(map);
+          $(".controls_btn").show();
+          $('#pxp-map-modal').modal('show');
       }
 
     });
 
 
-    DrawPolyzon(map, 1)
+    DrawPolygon(map, 1)
     DrawMarker(map);
     DrawPath(map);
     // Optional: Add event listeners, e.g., for clicks or hovers
@@ -246,6 +290,13 @@
       polygon.setMap(null); // Remove each polygon from the map
     });
     polygonslocations = []; // Clear the array
+
+    for (let marker of markers_loc) {
+      marker.setMap(null);
+    }
+    markers_loc = [];
+
+    //centerMarker_loc.setVisible(false);
 
     if (currentZoom > 12) {
       $.ajax({
@@ -265,7 +316,7 @@
             polygonsData = data.location_with_boundaries;
             polygonsData.forEach((polygonData, index) => {
               var fillOpacity = polygonData.fill_color_code ? 0.35 : 0;
-              console.log(fillOpacity);
+              //console.log(fillOpacity);
               var polygon = new google.maps.Polygon({
                 paths: polygonData.coords,
                 strokeColor: polygonData.boundry_color_code,
@@ -273,11 +324,32 @@
                 strokeWeight: 2,
                 fillColor: polygonData.fill_color_code,
                 fillOpacity: fillOpacity,
-                clickable: true,
+                clickable: false,
               });
               // Display the polygon on the map
               polygon.setMap(map);
               polygonslocations.push(polygon); // Store reference
+
+
+              var polygonCenter = getPolygonCenter(polygonData.coords);
+              var name_color_code = polygonData.name_color_code ? polygonData.name_color_code : "#000000";
+              centerMarker_loc = new google.maps.Marker({
+                position: polygonCenter,
+                map: map,
+                title: polygonData.info,  // This displays the zone name on hover
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 0, // Hide the default marker icon
+                },
+                label: {
+                  text: polygonData.info, // Replace with your label text
+                  color: name_color_code, // Label text color
+                  fontSize: "20px", // Adjust the font size
+                  fontWeight: "bold",
+                },
+              });
+
+              markers_loc.push(centerMarker_loc);
 
             });
           }
@@ -370,11 +442,13 @@
           polygon.setOptions({
             fillColor: polygonData.color,
             fillOpacity: fillOpacity,
+            clickable: true,
           });
         } else {
           centerMarker.setVisible(false); // Hide marker at zoom level below 15
           polygon.setOptions({
             fillOpacity: 0,
+            clickable: false,
           });
         }
       });
@@ -392,7 +466,7 @@
     });
   }
 
-  function DrawPolyzon(map, level) {
+  function DrawPolygon(map, level) {
 
     // var polygonsData = {{ zones_with_boundaries| safe}}
     $.ajax({
@@ -445,13 +519,16 @@
             }
           });
 
-          var infoContentAdm = `
-                <div class="custom-info-window">
-                  <h3>${markerData.label}</h3>
-                  <p>${markerData.description}</p>
-                  
-                </div>
-              `;
+
+
+          var infoContentAdm = '<div class="pxp-marker-short-price">' + markerData.label + '</div>' +
+            '<a href="#" class="pxp-marker-details">' +
+            '<div class="pxp-marker-details-fig pxp-cover" style="background-image: url(' + markerData.image + ');"></div>' +
+            '<div class="pxp-marker-details-info">' +
+            '<div class="pxp-marker-details-info-title">' + markerData.description + '</div>' +
+
+            '</div>' +
+            '</a>';
 
           var centerInfoWindowAdm = new google.maps.InfoWindow({
             content: infoContentAdm
@@ -510,16 +587,18 @@
           // Add mouseover event for each polyline
           google.maps.event.addListener(pathPolyline, 'mouseover', function (event) {
             document.getElementById("customInfoWindow").style.display = "block";
-            document.getElementById("video_container").innerHTML = pathData.html_data;
-            document.getElementById("video_info").innerHTML = pathData.info;
-            document.getElementById("video_title").innerHTML = pathData.title;
+            // document.getElementById("video_container").innerHTML = pathData.html_data;
+            // document.getElementById("video_info").innerHTML = pathData.info;
+            // document.getElementById("video_title").innerHTML = pathData.title;
+            $("#dynamic_content").html(pathData.html_data);
           });
 
           google.maps.event.addListener(pathPolyline, 'click', function (event) {
             document.getElementById("customInfoWindow").style.display = "block";
-            document.getElementById("video_container").innerHTML = pathData.html_data;
-            document.getElementById("video_info").innerHTML = pathData.info;
-            document.getElementById("video_title").innerHTML = pathData.title;
+            // document.getElementById("video_container").innerHTML = pathData.html_data;
+            // document.getElementById("video_info").innerHTML = pathData.info;
+            // document.getElementById("video_title").innerHTML = pathData.title;
+            $("#dynamic_content").html(pathData.html_data);
           });
 
           // Add mouseout event to hide the info window when the mouse leaves the polyline

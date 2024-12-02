@@ -11,7 +11,9 @@ class Project(models.Model):
     project_name = models.CharField(max_length=255,null=True, blank=False)
     description = models.TextField(blank=True, null=True)
     icon = models.FileField(upload_to='icons/',
-                             verbose_name="Icon", null=True, blank=True,max_length=255)
+                             verbose_name="Icon", null=True, blank=False,max_length=255)
+    image = models.FileField(upload_to='images/',
+                             verbose_name="Image", null=True, blank=False,max_length=255)
     latitude = models.CharField(max_length=20, null=True, blank=False)
     longitude = models.CharField(max_length=20, null=True, blank=False)
     is_active = models.BooleanField(default=True)

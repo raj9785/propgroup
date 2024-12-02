@@ -1,34 +1,80 @@
-<header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">Property Group</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Services</a>
-                </li>
-                {% if user.is_authenticated %}
-                <li class="nav-item">
-                   <a class="nav-link" href='/dashboard'> Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href={% url 'logout' %} > Logout</a>
-                </li>
+<div class="pxp-header pxp-full fixed-top">
+    <div class="pxp-container-full">
+        <div class="row align-items-center">
+            <div class="col-5 col-md-2">
+                <a href="/" class="pxp-logo text-decoration-none">Prop360d</a>
+            </div>
+            <div class="col-2 col-md-8 text-center">
+                <ul class="pxp-nav list-inline">
+                    <li class="list-inline-item">
+                        <a href="/">Home</a>
+                        
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#">Properties</a>
+                        <ul class="pxp-nav-sub rounded-lg">
+                            <li><a href="properties.html">All Properties</a></li>
+                            <li><a href="single-property.html">Single Property</a></li>
+                            <li><a href="submit-property.html">Submit New Property</a></li>
+                        </ul>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#">Agents</a>
+                        <ul class="pxp-nav-sub rounded-lg">
+                            <li><a href="agents.html">All Agents</a></li>
+                            <li><a href="single-agent.html">Single Agent</a></li>
+                        </ul>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#">Blog</a>
+                        <ul class="pxp-nav-sub rounded-lg">
+                            <li><a href="blog.html">All Blog Posts</a></li>
+                            <li><a href="single-post.html">Single Blog Post</a></li>
+                        </ul>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#">Themes</a>
+                        <ul class="pxp-nav-sub rounded-lg">
+                            <li><a href="../light/properties.html">Light</a></li>
+                            <li><a href="../dark/properties.html">Dark</a></li>
+                        </ul>
+                    </li>
+                    <li class="list-inline-item pxp-is-last"><a href="contact.html">Contact Us</a></li>
+                   
+                    <li class="list-inline-item pxp-has-btns">
+                      
+
+                       
+                        <div class="pxp-user-btns">
+                            {% if user.is_authenticated %}
+                            <a href="/dashboard" class="pxp-user-btns-signup ">Dashboard</a>
+                            <a href={% url 'logout' %} class="pxp-user-btns-login ">Logout</a>
+                            {%else%}
+                            <a href="#" class="pxp-user-btns-signup pxp-signup-trigger">Sign Up</a>
+                            <a href="#" class="pxp-user-btns-login pxp-signin-trigger">Sign In</a>
+                            {% endif %}
+                        </div>
+                       
+                    </li>
+                   
+                </ul>
+            </div>
+            {% if user.is_authenticated %}
+            <div class="col-5 col-md-2 text-right">
+               
+                <a href="javascript:void(0);" class="pxp-header-nav-trigger"><span class="fa fa-bars"></span></a>
+                <a href="/dashboard" class="pxp-header-user pxp-signin-trigger"><span class="fa fa-user-o"></span></a>
                 
-                {%else%}
-                <li class="nav-item">
-                   <a  class="nav-link" href="javascript:void(0)" data-toggle="modal" data-target="#authModal">Login</a>
-                </li>
-                {% endif %}
-            </ul>
+            </div>
+
+            {%else%}
+            <div class="col-5 col-md-2 text-right">
+               
+                <a href="javascript:void(0);" class="pxp-header-nav-trigger"><span class="fa fa-bars"></span></a>
+                <a href="javascript:void(0);" class="pxp-header-user pxp-signin-trigger"><span class="fa fa-user-o"></span></a>
+                
+            </div>
+            {% endif %}
         </div>
-    </nav>
-</header>
+    </div>
+</div>

@@ -156,7 +156,7 @@ def ajax_verify_otp(request):
                         date_joined = add_time(0)
                         userdata = User()
                         userdata.is_active = 1
-                        userdata.username = temp_user_data.mobile
+                        userdata.username = temp_user_data.email
                         userdata.first_name = temp_user_data.name
                         userdata.password = temp_user_data.password
                         userdata.is_staff = 0
@@ -365,6 +365,26 @@ def get_youtube_video_id(url):
     query_params = parse_qs(parsed_url.query)
     return query_params.get('v', [None])[0]
 
+def ajax_get_video_list(request):
+    city_id = request.GET.get('city_id') 
+    response_data={}
+    records = DroneVideo.objects.all().order_by('title').filter(is_active=True,city_id=city_id)
+    video_list=""
+    if records:
+        for index, drone in enumerate(records):
+            video_id = get_youtube_video_id(drone.video_url)
+            html_data='<iframe src="https://www.youtube.com/embed/'+video_id+'?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+            if index==0:
+               video_list=video_list+'<div class="carousel-item active">'
+            else:
+               video_list=video_list+'<div class="carousel-item">'    
+            video_list=video_list+'<div class="video-container" id="video_container">'+html_data+'</div>'
+            video_list=video_list+'<div class="" id="video_title"></div>'
+            video_list=video_list+'</div>'
+    response_data['video_list']=video_list
+    return HttpResponse(json.dumps(response_data), content_type="application/json")       
+
+
 def get_video_list(request):
     records = DroneVideo.objects.all().order_by('title').filter(is_active=True)
     data = {'list': list(records.values("id", "title"))}
@@ -486,6 +506,10 @@ def get_markers(city_id):
                icon =landmark.icon.url
             else:
                icon=""
+            if landmark.image:
+               image =landmark.image.url
+            else:
+               image=""   
             markers.append({
                 "id": str(landmark.id),
                 "type": "landmark",
@@ -494,6 +518,7 @@ def get_markers(city_id):
                 "lng": float(landmark.longitude),
                 'description':landmark.description,
                 'icon':icon,
+                'image':image
             })
 
     project_list = Project.objects.filter(is_active=True,city_id=city_id)
@@ -503,6 +528,10 @@ def get_markers(city_id):
                icon =project.icon.url
             else:
                icon=""
+            if project.image:
+               image =project.image.url
+            else:
+               image=""     
             markers.append({
                 "id": str(project.id),
                 "type": "landmark",
@@ -511,6 +540,7 @@ def get_markers(city_id):
                 "lng": float(project.longitude),
                 'description':project.description,
                 'icon':icon,
+                'image':image
             })    
 
     return markers   
@@ -527,6 +557,7 @@ def ajax_drone_video_paths(request):
 def get_drone_video_paths(city_id):
     drones = DroneVideo.objects.filter(is_active=True,city_id=city_id)
     drone_data = []
+    video_list=""
     for drone in drones:
         # Get all boundary points for the zone, ordered by sequence number
         drone_path_list= DroneVideoPath.objects.filter(drone_video=drone).order_by('sequence_number')
@@ -539,7 +570,11 @@ def get_drone_video_paths(city_id):
             color_code="" 
         if drone.video_url :    
             video_id = get_youtube_video_id(drone.video_url)
-            html_data='<iframe width="200" height="113" src="https://www.youtube.com/embed/'+video_id+'?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+            html_data='<iframe src="https://www.youtube.com/embed/'+video_id+'?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+            video_list=video_list+'<div class="carousel-item active">'   
+            video_list=video_list+'<div class="video-container" id="video_container">'+html_data+'</div>'
+            video_list=video_list+'<div class="" id="video_title"></div>'
+            video_list=video_list+'</div>'
         else:
            html_data="";  
 
@@ -549,7 +584,7 @@ def get_drone_video_paths(city_id):
             "info": drone.description,
             "title": drone.title,
             "color": color_code,
-            "html_data":html_data,
+            "html_data":video_list,
             "coordinates": path_coords
         })
     

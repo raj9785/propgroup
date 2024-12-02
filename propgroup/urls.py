@@ -45,6 +45,8 @@ urlpatterns = [
     path('ajax_location_polygons', views.ajax_location_polygons, name="ajax_location_polygons"),
     path('ajax_get_markers', views.ajax_get_markers, name="ajax_get_markers"),
     path('ajax_drone_video_paths', views.ajax_drone_video_paths, name="ajax_drone_video_paths"),
+    path('ajax_get_video_list', views.ajax_get_video_list, name="ajax_get_video_list"),
+    
     path('logout', views.logout_view, name = 'logout'), 
 ] 
 if settings.DEBUG:

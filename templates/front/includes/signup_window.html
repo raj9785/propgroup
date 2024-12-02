@@ -1,109 +1,186 @@
 {% load static %}
-<div class="modal fade" id="authModal" tabindex="-1" role="dialog" aria-labelledby="authModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="pxp-signin-modal" tabindex="-1" role="dialog" aria-labelledby="pxpSigninModal"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="authModalLabel">Login</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <!-- Tabs -->
-                <ul class="nav nav-tabs" id="authTab" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" id="login-tab" data-toggle="tab" href="#login" role="tab"
-                            aria-controls="login" aria-selected="true">
-                            Login
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="signup-tab" data-toggle="tab" href="#signup" role="tab"
-                            aria-controls="signup" aria-selected="false">
-                            Register
-                        </a>
-                    </li>
-                </ul>
+                <h5 class="modal-title" id="pxpSigninModal">Welcome back!</h5>
 
-                <!-- Tab Content -->
-                <div class="tab-content mt-3" id="authTabContent">
-                    <!-- Login Tab -->
-                    <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-
-                        <form id="login_form" action={% url 'ajax_login' %} method='POST'>
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <label for="loginEmail">Email</label>
-                                <input type="email" name="username" class="form-control" id="username"
-                                    placeholder="Enter email" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="loginPassword">Password</label>
-                                <input type="password" name="password" class="form-control" id="loginPassword"
-                                    placeholder="Enter password" required />
-                            </div>
-                            <button type="button" class="btn btn-primary btn-block submit_login"
-                                id="submit_login">Login</button>
-                        </form>
-                        <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div"></span>
+                <form id="login_form" class="mt-4" action={% url 'ajax_login' %} method='POST'>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="pxp-signin-email">Email</label>
+                        <input type="text" class="form-control" name="username" id="pxp-signin-email"
+                            placeholder="Enter your email address">
                     </div>
+                    <div class="form-group">
+                        <label for="pxp-signin-pass">Password</label>
+                        <input type="password" class="form-control" name="password" id="pxp-signin-pass"
+                            placeholder="Enter your password">
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="pxp-agent-contact-modal-btn submit_login" id="submit_login">Sign
+                            In</button>
 
-                    <!-- Signup Tab -->
-                    <div class="tab-pane fade" id="signup" role="tabpanel" aria-labelledby="signup-tab">
-                        <div class="register_div">
-                            <form id="register_form" action={% url 'ajax_register' %} method='POST'>
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <label for="name">Full Name</label>
-                                    <input type="text" name="name" maxlength="25"  class="form-control" id="name"
-                                        placeholder="Enter full name" required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control" maxlength="50" id="email" name="email" placeholder="Enter email"
-                                        required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="mobile">Mobile</label>
-                                    <input type="tel" class="form-control" name="mobile" id="mobile" placeholder="Enter mobile"
-                                        required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input type="password" name="password" class="form-control" id="password"
-                                        placeholder="Enter password" required />
-                                </div>
-                                <button type="button" id="register_button" class="btn btn-primary btn-block register_button">Signup</button>
-                                <span style="width: 100%; text-align: center;" class="msg_div_reg"></span>
-                            </form>
-                        </div>
-                        <div class="otp_div" id="otp_div" style="display: none;">
-                            <form id="verify_otp_form" action={% url 'ajax_verify_otp' %} method='POST'>
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <label class="label" for="signupName">Enter the 4 digits OTP received on <span id="user_number">
-                                    </span></label>
-                                    <input type="hidden" name="mobile" id="otpmobile">
-                                    <input type="hidden" name="verify_type" id="verify_type" value='1'>
-                                    <input type="hidden" name="temp_id" id="temp_id" value=''>
-                                    <input type="text" maxlength="4" class="form-control" id="otp"
-                                                placeholder="OTP" name="otp" required />
-                                </div>
-                               
-                                    <div style="margin-top:0px" class="forgetPassword"><a href="javascript:void(0)"
-                                            id="resend_otp" class="resend_otp"><small>Resend OTP</small></a></div>
-                                
-                                <button type="button" id="verify_otp" class="btn btn-primary btn-block verify_otp">Verify OTP</button>
-                                <span style="width: 100%; text-align: center;" class="msg_div_otp"></span>
-                            </form>
-
-                        </div>
 
                     </div>
+                    <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div"></span>
+                    <div class="form-group mt-4 text-center pxp-modal-small">
+                        <a href="#" class="pxp-modal-link">Forgot password</a>
+                    </div>
+                    <div class="text-center pxp-modal-small">
+                        New to Prop360d? <a href="javascript:void(0);" class="pxp-modal-link pxp-signup-trigger">Create
+                            an account</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pxp-signup-modal" tabindex="-1" role="dialog" aria-labelledby="pxpSignupModal"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5 class="modal-title" id="pxpSignupModal">Create an account</h5>
+                <div class="register_div">
+                    <form id="register_form" class="mt-4" action={% url 'ajax_register' %} method='POST'>
+                        {% csrf_token %}
+                        <!-- <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="pxp-signup-firstname">First Name</label>
+                                <input type="text" class="form-control" id="pxp-signup-firstname"
+                                    placeholder="Enter first name">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="pxp-signup-lastname">Last Name</label>
+                                <input type="text" class="form-control" id="pxp-signup-lastname"
+                                    placeholder="Enter last name">
+                            </div>
+                        </div>
+                    </div> -->
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" name="name" maxlength="25" class="form-control" id="name"
+                                placeholder="Enter full name" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" maxlength="50" id="email" name="email"
+                                placeholder="Enter email" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile</label>
+                            <input type="tel" maxlength="10" class="form-control" name="mobile" id="mobile"
+                                placeholder="Enter mobile" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" class="form-control" id="password"
+                                placeholder="Enter password" required />
+                        </div>
+                        <div class="form-group">
+                            <button type="button" id="register_button"
+                                class="pxp-agent-contact-modal-btn register_button">Sign Up</button>
+
+
+                        </div>
+                        <span style="width: 100%; text-align: center;" class="msg_div_reg"></span>
+                        <div class="text-center mt-4 pxp-modal-small">
+                            Already have an account? <a href="javascript:void(0);"
+                                class="pxp-modal-link pxp-signin-trigger">Sign in</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="otp_div" id="otp_div" style="display: none;">
+                    <form id="verify_otp_form" class="mt-4" action={% url 'ajax_verify_otp' %} method='POST'>
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="label" for="signupName">Enter the 4 digits OTP received on <span
+                                    id="user_number">
+                                </span></label>
+                            <input type="hidden" name="mobile" id="otpmobile">
+                            <input type="hidden" name="verify_type" id="verify_type" value='1'>
+                            <input type="hidden" name="temp_id" id="temp_id" value=''>
+                            <input type="text" maxlength="4" class="form-control" id="otp" placeholder="OTP" name="otp"
+                                required />
+                        </div>
+
+                        <div style="margin-top:0px" class="forgetPassword"><a href="javascript:void(0)" id="resend_otp"
+                                class="resend_otp"><small>Resend OTP</small></a></div>
+                        <div class="form-group">
+                            <button type="button" id="verify_otp" class="pxp-agent-contact-modal-btn verify_otp">Verify
+                                OTP</button>
+                        </div>
+                        <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div_otp"></span>
+                    </form>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+
+
+<div class="modal fade" id="pxp-map-modal" tabindex="-1" role="dialog" aria-labelledby="pxpMapModal"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5 class="modal-title" id="pxpSigninModal">Provide Below Information</h5>
+
+                <form id="login_form" class="mt-4" action={% url 'ajax_login' %} method='POST'>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name_map">Name</label>
+                        <input type="text" class="form-control" name="name" id="name_map"
+                            placeholder="">
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="button" class="pxp-agent-contact-modal-btn submit_map" id="submit_map">Submit</button>
+
+
+                    </div>
+                    <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div_map"></span>
+                   
+                   
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
 
 {% include "front/includes/auth_script.html" %}
