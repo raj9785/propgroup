@@ -13,16 +13,16 @@
   let polylineD; // Variable to hold the polyline object
   let markers = []; // Array to store markers
   let markers_loc = []; // Array to store markers
-  let map_edit=false;
-  let action_type="";
-  let currentZoomVar=11;
+  let map_edit = false;
+  let action_type = "";
+  let currentZoomVar = 11;
   let map;
-  function take_action(action_id){
-    action_type=action_id;
-    map_edit=true;
-    map.setZoom(13);   
+  function take_action(action_id) {
+    action_type = action_id;
+    map_edit = true;
+    map.setZoom(13);
     clearPath();              // Sets the zoom level to 14
-   }
+  }
 
   function drawPath(map) {
     // Remove the old polyline if it exists
@@ -83,9 +83,73 @@
       clearPath();
     });
     get_drone_video();
+    $(document).on("click", ".submit_map", function () {
+      form = document.getElementById("map_form");
+      formdata = new FormData(form);
+      if($("#id_action_type").val()=="3"){
+        formdata.append("latlongs", JSON.stringify(pathCoordinatesD));
+      }
+      
+
+      $.ajax({
+        url: $("#map_form").attr("action"),
+        type: "POST",
+        enctype: "multipart/form-data",
+        data: formdata,
+        dataType: "json",
+        cache: false,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+          $("#submit_map").html("Wait..");
+          $("#beginSubmit").removeClass("beginSubmit");
+        },
+        success: function (data) {
+          var response = "";
+          $("#submit_map").html(
+            `Submit`
+          );
+          $("#submit_map").addClass("submit_map");
+          if (data.error == false) {
+            response +=
+                '<div class="alert alert-success" role="alert">' +
+                data.message +
+                "</div>";
+                form.reset();
+                $(".msg_div_map").html(response);
+                clearPath();
+          } else {
+           
+            var resp = data.errors;
+            if (data.message == "") {
+              $.each(resp, function (k, value) {
+                response +=
+                  '<div class="alert alert-danger" role="alert">' +
+                  k +
+                  " : " +
+                  value +
+                  `</div>`;
+              });
+            } else {
+              response +=
+                '<div class="alert alert-danger" role="alert">' +
+                data.message +
+                "</div>";
+            }
+            $(".msg_div_map").html(response);
+
+          }
+        },
+      });
+
+
+    });
+
+
+
   });
-  
-  function get_drone_video(){
+
+  function get_drone_video() {
     $.ajax({
       url: "{% url 'ajax_get_video_list' %}",
       type: "get",
@@ -100,7 +164,7 @@
       },
       success: function (data) {
         $("#dynamic_content").html(data.video_list);
-        
+
       },
     });
 
@@ -166,7 +230,7 @@
 
 
   async function initMap() {
-    
+
     // Coordinates for the center of the city (Gurgaon)
     var cityCenter = { lat: parseFloat('{{city_info.center_latitude}}'), lng: parseFloat('{{city_info.center_longitude}}') };
 
@@ -181,7 +245,7 @@
     map_zoom = parseInt('{{city_info.map_zoom}}');
     map_min_zoom = parseInt('{{city_info.map_min_zoom}}');
     map_max_zoom = parseInt('{{city_info.map_max_zoom}}');
-     map = new google.maps.Map(document.getElementById('map'), {
+    map = new google.maps.Map(document.getElementById('map'), {
       zoom: map_zoom,             // Set the initial zoom level
       minZoom: map_min_zoom,           // Minimum zoom level allowed
       maxZoom: map_max_zoom,          // Maximum zoom level allowed
@@ -206,7 +270,7 @@
       //     strictBounds: true
       // }
     });
-   
+
     // Load the GeoJSON file
     // map.data.loadGeoJson('{{city_info.boundry_file.url}}');
 
@@ -237,39 +301,61 @@
       //     position: event.latLng,
       // });
       // infoWindow.open(map);
-      if (page_name == "dashboard" && map_edit==true) {
-          if(action_type!="3"){
-            clearPath();
-            var icon_path={
-              
-            }
-          }else{
-            var icon_path={
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 2, // Hide the default marker icon
-            }
+      if (page_name == "dashboard" && map_edit == true) {
+        if (action_type != "3") {
+          clearPath();
+          var icon_path = {
+
           }
-         
-          const marker_clicked = new google.maps.Marker({
-            position: event.latLng,
-            map: map,
-            icon:icon_path,
-          });
+        } else {
+          var icon_path = {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 2, // Hide the default marker icon
+          }
+        }
 
-          // Store the marker in the array
-          markers.push(marker_clicked);
-          const clickedLocation = {
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng()
-          };
+        const marker_clicked = new google.maps.Marker({
+          position: event.latLng,
+          map: map,
+          icon: icon_path,
+        });
 
-          // Add the new point to the path
-           pathCoordinatesD.push(clickedLocation);
-          
-          // Draw or update the polyline
-          drawPath(map);
-          $(".controls_btn").show();
-          $('#pxp-map-modal').modal('show');
+        // Store the marker in the array
+        markers.push(marker_clicked);
+        const clickedLocation = {
+          lat: event.latLng.lat(),
+          lng: event.latLng.lng()
+        };
+
+        // Add the new point to the path
+        pathCoordinatesD.push(clickedLocation);
+
+        // Draw or update the polyline
+        drawPath(map);
+        $(".controls_btn").show();
+
+        $.ajax({
+          url: "{% url 'get_map_form' %}",
+          type: "get",
+          data: {
+            "action_type": action_type,
+            "city_id": "{{city_id}}"
+          },
+          dataType: "html",
+          cache: false,
+          contentType: false,
+          beforeSend: function () {
+
+          },
+          success: function (data) {
+            $("#form_data").html(data);
+            $("#content_data").hide();
+            $("#form_data").show();
+            $("#id_latitude").val(event.latLng.lat());
+            $("#id_longitude").val(event.latLng.lng());
+          },
+        });
+
       }
 
     });

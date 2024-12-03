@@ -139,40 +139,7 @@
 
 
 
-<div class="modal fade" id="pxp-map-modal" tabindex="-1" role="dialog" aria-labelledby="pxpMapModal"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <h5 class="modal-title" id="pxpSigninModal">Provide Below Information</h5>
 
-                <form id="login_form" class="mt-4" action={% url 'ajax_login' %} method='POST'>
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="name_map">Name</label>
-                        <input type="text" class="form-control" name="name" id="name_map"
-                            placeholder="">
-                    </div>
-                    
-                    <div class="form-group">
-                        <button type="button" class="pxp-agent-contact-modal-btn submit_map" id="submit_map">Submit</button>
-
-
-                    </div>
-                    <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div_map"></span>
-                   
-                   
-                </form>
-
-            </div>
-        </div>
-    </div>
-</div>
 
 
 

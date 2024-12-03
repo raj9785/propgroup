@@ -1,0 +1,90 @@
+{% load static %}
+<h5 class="modal-title" id="pxpSigninModal">{{page_title}}</h5>
+
+<form id="map_form" enctype="multipart/form-data" class="mt-4" action={% url 'save_map' %} method='POST'>
+    {% csrf_token %}
+    <input type="hidden" name="action_type" value="{{action_type}}" id="id_action_type">
+    {% if action_type == "1" %}
+    {{map_form.latitude}}
+    {{map_form.longitude}}
+
+    
+    <input type="hidden" name="state" value="1" id="id_state">
+    <input type="hidden" name="city" value="1" id="id_city">
+    <input type="hidden" name="zone" value="1" id="id_zone">
+
+    <div class="form-group">
+        <label for="id_name">Title</label>
+        {{map_form.name}}
+    </div>
+    <div class="form-group">
+        <label for="id_description">Description</label>
+        {{map_form.description}}
+    </div>
+    <div class="form-group">
+        <label for="id_icon">Map Icon</label>
+        {{map_form.icon}}
+    </div>
+
+    <div class="form-group">
+        <label for="id_icon">Image</label>
+        {{map_form.image}}
+    </div>
+
+    {% elif action_type == "2" %}
+    {{map_form.latitude}}
+    {{map_form.longitude}}
+
+
+    <input type="hidden" name="state" value="1" id="id_state">
+    <input type="hidden" name="city" value="1" id="id_city">
+    <input type="hidden" name="zone" value="1" id="id_zone">
+
+    <div class="form-group">
+        <label for="id_name">Project Name</label>
+        {{map_form.project_name}}
+    </div>
+    <div class="form-group">
+        <label for="id_description">Description</label>
+        {{map_form.description}}
+    </div>
+    <div class="form-group">
+        <label for="id_icon">Map Icon</label>
+        {{map_form.icon}}
+    </div>
+
+    <div class="form-group">
+        <label for="id_icon">Image</label>
+        {{map_form.image}}
+    </div>
+    {% else %}
+    <input type="hidden" name="state" value="1" id="id_state">
+    <input type="hidden" name="city" value="1" id="id_city">
+    <input type="hidden" name="zone" value="1" id="id_zone">
+
+    <div class="form-group">
+        <label for="id_name">Youtube URL</label>
+        {{map_form.video_url}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Title</label>
+        {{map_form.title}}
+    </div>
+    <div class="form-group">
+        <label for="id_description">Description</label>
+        {{map_form.description}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Path Color Code (HEX Code)</label>
+        {{map_form.path_color_code}}
+    </div>
+    {% endif %}
+    <div class="form-group">
+        <button type="button" class="pxp-agent-contact-modal-btn submit_map" id="submit_map">Submit</button>
+
+
+    </div>
+    <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div_map"></span>
+
+
+</form>

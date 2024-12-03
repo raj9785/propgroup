@@ -20,7 +20,7 @@ import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render, redirect
-
+from .forms import LandmarkForm,ProjectForm,DroneVideoForm
 def add_time(addminutes):
     itc_timezone = pytz.timezone('Asia/Kolkata')
     current_datetime_itc = timezone.now().astimezone(itc_timezone)
@@ -381,6 +381,7 @@ def ajax_get_video_list(request):
             video_list=video_list+'<div class="video-container" id="video_container">'+html_data+'</div>'
             video_list=video_list+'<div class="" id="video_title"></div>'
             video_list=video_list+'</div>'
+    
     response_data['video_list']=video_list
     return HttpResponse(json.dumps(response_data), content_type="application/json")       
 
@@ -589,6 +590,135 @@ def get_drone_video_paths(city_id):
         })
     
     return drone_data
+
+
+def save_map(request):
+    response_data = {}
+    userdata = request.user
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+           action_type = request.POST['action_type'] 
+           data = request.POST.copy()
+           files = request.FILES  # Get uploaded files
+           if action_type=="1":
+            landmark_form = LandmarkForm(data,files)
+            if landmark_form.is_valid():
+                landmark = landmark_form.save(commit=False)
+                #landmark.event_id = event_id
+                
+                landmark.save()
+                # data._mutable = _mutable
+                response_data['error'] = False
+                response_data['message'] = "Request Sent Successfully"
+                response_data['class'] = "success"
+                response_data['errors'] = ""
+            else:
+                response_data['error'] = True
+                response_data['class'] = 'error'
+                response_data['error_type'] = '2'
+                response_data['message'] = ""
+                response_data['errors'] = landmark_form.errors
+           elif action_type=="2":
+              project_form = ProjectForm(data,files)
+              if project_form.is_valid():
+                    project = project_form.save(commit=False)
+                    #landmark.event_id = event_id
+                    
+                    project.save()
+                    # data._mutable = _mutable
+                    response_data['error'] = False
+                    response_data['message'] = "Request Sent Successfully"
+                    response_data['class'] = "success"
+                    response_data['errors'] = ""
+              else:
+                    response_data['error'] = True
+                    response_data['class'] = 'error'
+                    response_data['error_type'] = '2'
+                    response_data['message'] = ""
+                    response_data['errors'] = project_form.errors
+           else:
+                latlongs= request.POST['latlongs']
+                if latlongs:
+                    try:
+                        path_coordinates = json.loads(latlongs)
+                        if path_coordinates:
+                            drone_video_form = DroneVideoForm(data)
+                            if drone_video_form.is_valid():
+                                    drone_video = drone_video_form.save(commit=False)
+                                    #landmark.event_id = event_id
+                                    
+                                    drone_video.save()
+                                    # data._mutable = _mutable
+                                
+                                    for index, path_coordinate in enumerate(path_coordinates):    
+                                        drone_video_path = DroneVideoPath()
+                                        drone_video_path.drone_video = drone_video
+                                        drone_video_path.latitude = path_coordinate['lat']
+                                        drone_video_path.longitude = path_coordinate['lng']
+                                        drone_video_path.sequence_number = index+1
+                                        drone_video_path.save() 
+
+                                    response_data['error'] = False
+                                    response_data['message'] = "Request Sent Successfully"
+                                    response_data['class'] = "success"
+                                    response_data['errors'] = ""
+                            else:
+                                    response_data['error'] = True
+                                    response_data['class'] = 'error'
+                                    response_data['error_type'] = '2'
+                                    response_data['message'] = ""
+                                    response_data['errors'] = drone_video_form.errors
+                        
+                        
+                        else:
+                            response_data['error'] = True
+                            response_data['message'] = "* Draw path on Map"
+                            response_data['class'] = "error"
+                            response_data['errors'] = ""  
+
+                    except json.JSONDecodeError as e:
+                            response_data['error'] = True
+                            response_data['message'] = "* Invalid JSON format"
+                            response_data['class'] = "error"
+                            response_data['errors'] = ""  
+        else:
+            response_data['error'] = True
+            response_data['message'] = "* Invalid access"
+            response_data['class'] = "error"
+            response_data['errors'] = ""     
+ 
+    else:
+        response_data['error'] = True
+        response_data['message'] = "* Access not allowed"
+        response_data['class'] = "error"
+        response_data['errors'] = ""
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def get_map_form(request):
+    context = {}
+    city_id = request.GET.get('city_id') 
+    action_type = request.GET.get('action_type') 
+    if action_type=="1":
+        title="Add Landmark"
+        context['map_form'] = LandmarkForm()
+    elif action_type=="2":
+        title="Add Project"
+        context['map_form'] = ProjectForm()
+    else:
+        title="Add Drone Video"
+        context['map_form'] = DroneVideoForm()       
+
+    context['page_title'] = title
+    context['action_type'] = action_type
+    context['city_id'] =city_id
+   
+
+    return render(request, 'front/includes/map_forms.html', context)
+
+
+
 
 def index(request):
     context = {}
