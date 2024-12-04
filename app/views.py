@@ -591,6 +591,49 @@ def get_drone_video_paths(city_id):
     
     return drone_data
 
+from shapely.geometry import Point, Polygon
+def find_zone(request):
+    lat = request.GET.get('lat') 
+    lon = request.GET.get('lng') 
+    lat=float(lat)
+    lon=float(lon)
+    response_data = {}
+    response_data['error'] = True
+    response_data['message'] = "Zone not Found"
+    response_data['data'] = {}
+    response_data['class'] = "error"
+    response_data['errors'] = ""
+    zone_list = Zone.objects.filter(is_active=True)
+    if zone_list: 
+        for zone_data in zone_list:
+            polygon_coords=[]
+            zone_path_list= ZoneBoundry.objects.filter(zone_id=zone_data.id)
+            polygon_coords = [(float(loc.longitude), float(loc.latitude)) for loc in zone_path_list]
+            polygon = Polygon(polygon_coords)
+
+            # Define the point
+            point = Point(lon, lat)
+
+            # Check if the point is inside the polygon
+            is_inside = polygon.contains(point)
+            print(polygon_coords)
+            print(is_inside)
+           
+            if(is_inside==True):
+                zone_info={}
+                zone_info['zone_id']=zone_data.id
+                zone_info['zone_name']=zone_data.zone_name
+                zone_info['state']=zone_data.state.id
+                zone_info['city']=zone_data.city.id
+                response_data['error'] = False
+                response_data['message'] = "Zone Found"
+                response_data['data'] = zone_info
+                response_data['class'] = "success"
+                response_data['errors'] = ""
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
 
 def save_map(request):
     response_data = {}

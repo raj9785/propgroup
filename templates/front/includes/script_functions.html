@@ -86,10 +86,10 @@
     $(document).on("click", ".submit_map", function () {
       form = document.getElementById("map_form");
       formdata = new FormData(form);
-      if($("#id_action_type").val()=="3"){
+      if ($("#id_action_type").val() == "3") {
         formdata.append("latlongs", JSON.stringify(pathCoordinatesD));
       }
-      
+
 
       $.ajax({
         url: $("#map_form").attr("action"),
@@ -112,14 +112,14 @@
           $("#submit_map").addClass("submit_map");
           if (data.error == false) {
             response +=
-                '<div class="alert alert-success" role="alert">' +
-                data.message +
-                "</div>";
-                form.reset();
-                $(".msg_div_map").html(response);
-                clearPath();
+              '<div class="alert alert-success" role="alert">' +
+              data.message +
+              "</div>";
+            form.reset();
+            $(".msg_div_map").html(response);
+            clearPath();
           } else {
-           
+
             var resp = data.errors;
             if (data.message == "") {
               $.each(resp, function (k, value) {
@@ -353,6 +353,33 @@
             $("#form_data").show();
             $("#id_latitude").val(event.latLng.lat());
             $("#id_longitude").val(event.latLng.lng());
+            $.ajax({
+              url: "{% url 'find_zone' %}",
+              type: "get",
+              data: {
+                "lat": event.latLng.lat(),
+                "lng": event.latLng.lng()
+              },
+              dataType: "html",
+              cache: false,
+              contentType: false,
+              beforeSend: function () {
+
+              },
+              success: function (response_zone_data) {
+               console.log(response_zone_data);
+               response_zone_data=JSON.parse(response_zone_data);
+               if(response_zone_data.class=='success'){
+                var zone_data=response_zone_data.data
+                $("#id_state").val(zone_data.state);
+                $("#id_city").val(zone_data.city);
+                $("#id_zone").val(zone_data.zone_id);
+               }
+               
+              },
+            });
+
+
           },
         });
 
