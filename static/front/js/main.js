@@ -585,6 +585,8 @@
     $('.pxp-signin-trigger').click(function() {
         $('#pxp-signup-modal').modal('hide');
         $('#pxp-signin-modal').modal('show');
+        var action_id=$(this).attr("action_id");
+        $(".redirect_to").val(action_id);
     });
     $('.pxp-signup-trigger').click(function() {
         $('#pxp-signin-modal').modal('hide');

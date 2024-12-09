@@ -24,10 +24,11 @@
 
     {% if page_name == "dashboard" %}
     <div id="controls" class="controls_btn" style="display: none;">
-      <button class="btn btn-secondary" id="clearPathButton">Remove</button>
+      <button class="btn btn-secondary" id="single_remove" onclick="removeMarker()">Undo</button>
+      <button class="btn btn-secondary" id="clearPathButton">Undo All</button>
     </div>
 
-    <div id="actions_btn" class="action_btn">
+    <!-- <div id="actions_btn" class="action_btn">
       
       <div class="btn-group" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
@@ -40,7 +41,7 @@
           <a class="dropdown-item" href="#" onclick="take_action('3')">Drone Video</a>
         </div>
       </div>
-    </div>
+    </div> -->
 
 
     {% endif %}

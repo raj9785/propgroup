@@ -1,8 +1,10 @@
+{% load static %}
 <script>
   // Get the close button and custom info window
   const closeButton_Info = document.getElementById('closeInfoWindow');
   const customInfoWindow = document.getElementById('customInfoWindow');
   const page_name = '{{page_name}}';
+  let action_type_page = '{{action_type}}';
   let centerMarker_loc;
   // Add click event to close the info window
   closeButton_Info.addEventListener('click', () => {
@@ -24,6 +26,35 @@
     clearPath();              // Sets the zoom level to 14
   }
 
+  function clear_btn_text() {
+    if (action_type == "3") {
+      $("#clearPathButton").html("Undo All");
+    } else {
+      $("#clearPathButton").html("Undo");
+    }
+  }
+
+  function removeMarker() {
+    if (markers.length > 0) {
+      const lastMarker = markers.pop(); // Get the last marker
+      lastMarker.setMap(null); // Remove it from the map
+
+      // Remove the last coordinate from the path
+      pathCoordinatesD.pop();
+
+      // Redraw the polyline
+      drawPath(map);
+      markers_length=markers.length;
+      if(markers_length==0){
+        $(".controls_btn").hide();
+      }
+    } else {
+      $("#single_remove").hide();
+      $(".controls_btn").hide();
+      alert("No markers to remove!");
+    }
+  }
+
   function drawPath(map) {
     // Remove the old polyline if it exists
     if (polylineD) {
@@ -34,7 +65,7 @@
     polylineD = new google.maps.Polyline({
       path: pathCoordinatesD,
       geodesic: true,
-      strokeColor: '#FF0000', // Path color
+      strokeColor: '#008000', // Path color
       strokeOpacity: 1.0,
       strokeWeight: 2
     });
@@ -52,10 +83,12 @@
 
     if (polylineD) {
       polylineD.setMap(null);
+      clear_btn_text();
       $(".controls_btn").hide();
     }
     pathCoordinatesD = [];
     drawPath(map);
+    $("#single_remove").hide();
   }
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -82,7 +115,14 @@
     $("#clearPathButton").on("click", function () {
       clearPath();
     });
+    if (action_type_page) {
+      setTimeout(() => {
+        take_action(action_type_page);
+      }, 100);
+
+    }
     get_drone_video();
+
     $(document).on("click", ".submit_map", function () {
       form = document.getElementById("map_form");
       formdata = new FormData(form);
@@ -302,15 +342,26 @@
       // });
       // infoWindow.open(map);
       if (page_name == "dashboard" && map_edit == true) {
+        $(".controls_btn").show();
         if (action_type != "3") {
           clearPath();
+          $("#clearPathButton").hide();
+          $("#single_remove").show();
           var icon_path = {
 
           }
         } else {
+          $("#single_remove").show();
+          // var icon_path = {
+          //   path: google.maps.SymbolPath.CIRCLE,
+          //   scale: 2, // Hide the default marker icon
+          // }
+          $("#clearPathButton").show();
           var icon_path = {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 2, // Hide the default marker icon
+            url: "{% static 'front/images/drone.png' %}", // URL to the custom icon image
+            scaledSize: new google.maps.Size(12, 12), // Scale the icon to desired size
+            origin: new google.maps.Point(0, 0), // Origin point of the icon
+            anchor: new google.maps.Point(5, 5) // Anchor point of the icon (centered)
           }
         }
 
@@ -318,7 +369,17 @@
           position: event.latLng,
           map: map,
           icon: icon_path,
+          draggable: true,
         });
+
+        // // Add the "Remove" button
+        // const infoWindow = new google.maps.InfoWindow({
+        //   content: `<button onclick="removeMarker(${markers.length})" style="color:red;cursor:pointer;">Remove</button>`,
+        //   position: event.latLng,
+        // });
+
+        // // Open the InfoWindow with the remove button
+        // infoWindow.open(map, marker_clicked);
 
         // Store the marker in the array
         markers.push(marker_clicked);
@@ -329,9 +390,39 @@
 
         // Add the new point to the path
         pathCoordinatesD.push(clickedLocation);
+        google.maps.event.addListener(marker_clicked, "dragend", function (event) {
+          const newLocation = {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng(),
+          };
+          console.log("Marker moved to:", newLocation);
+          // Update the marker in the `markers` array
+          for (let i = 0; i < markers.length; i++) {
+            if (markers[i] === marker_clicked) {
+              // Update the position in the markers array
+              markers[i].setPosition(event.latLng);
+              break;
+            }
+          }
+
+          // Update the new position in `pathCoordinatesD`
+          for (let i = 0; i < pathCoordinatesD.length; i++) {
+            if (
+              pathCoordinatesD[i].lat === clickedLocation.lat &&
+              pathCoordinatesD[i].lng === clickedLocation.lng
+            ) {
+              pathCoordinatesD[i] = newLocation; // Update the position
+              break;
+            }
+          }
+
+
+          drawPath(map);
+        });
 
         // Draw or update the polyline
         drawPath(map);
+        clear_btn_text();
         $(".controls_btn").show();
 
         $.ajax({
@@ -367,15 +458,15 @@
 
               },
               success: function (response_zone_data) {
-               console.log(response_zone_data);
-               response_zone_data=JSON.parse(response_zone_data);
-               if(response_zone_data.class=='success'){
-                var zone_data=response_zone_data.data
-                $("#id_state").val(zone_data.state);
-                $("#id_city").val(zone_data.city);
-                $("#id_zone").val(zone_data.zone_id);
-               }
-               
+                console.log(response_zone_data);
+                response_zone_data = JSON.parse(response_zone_data);
+                if (response_zone_data.class == 'success') {
+                  var zone_data = response_zone_data.data
+                  $("#id_state").val(zone_data.state);
+                  $("#id_city").val(zone_data.city);
+                  $("#id_zone").val(zone_data.zone_id);
+                }
+
               },
             });
 
@@ -396,6 +487,7 @@
     //   document.getElementById("customInfoWindow").style.display = "none";
     // });
   }
+
 
   let polygonslocations = [];
   function DrawLocationPolygons(map, currentZoom) {
@@ -483,8 +575,19 @@
     });
     polygons = []; // Clear the array
 
+    if (map_edit == true) {
+      var is_cliclable = false;
+    } else {
+      var is_cliclable = true;
+    }
+
     polygonsData.forEach((polygonData, index) => {
-      var fillOpacity = polygonData.color ? 0.35 : 0;
+      if (map_edit == false) {
+        var fillOpacity = polygonData.color ? 0.35 : 0;
+      } else {
+        var fillOpacity = 0;
+      }
+
 
       var polygon = new google.maps.Polygon({
         paths: polygonData.coords,
@@ -493,7 +596,7 @@
         strokeWeight: 2,
         fillColor: polygonData.color,
         fillOpacity: fillOpacity,
-        clickable: true,
+        clickable: is_cliclable,
       });
       // Display the polygon on the map
       polygon.setMap(map);
@@ -554,8 +657,8 @@
           centerMarker.setVisible(true); // Show marker at zoom level 15 or above
           polygon.setOptions({
             fillColor: polygonData.color,
-            fillOpacity: fillOpacity,
-            clickable: true,
+            fillOpacity: map_edit == true ? 0 : fillOpacity,
+            clickable: map_edit == true ? false : true,
           });
         } else {
           centerMarker.setVisible(false); // Hide marker at zoom level below 15
@@ -658,6 +761,7 @@
   }
 
   function DrawPath(map) {
+    let pathData_color = "#008000";
     $.ajax({
       url: "{% url 'ajax_drone_video_paths' %}",
       type: "get",
@@ -675,18 +779,23 @@
         paths.forEach((pathData, index) => {
           var pathPolyline = new google.maps.Polyline({
             path: pathData.coordinates,
-            strokeColor: pathData.color,
-            strokeOpacity: 0,
-            strokeWeight: 5,
+            strokeColor: pathData_color,//pathData.color,
+            strokeOpacity: 1,
+            strokeWeight: 3,
             icons: [
               {
-                icon: {
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 3,
-                  fillColor: pathData.color,
-                  fillOpacity: 1,
-                  strokeWeight: 0,
-                },
+                // icon: {
+                //   path: google.maps.SymbolPath.CIRCLE,
+                //   scale: 3,
+                //   fillColor: pathData_color,
+                //   fillOpacity: 1,
+                //   strokeWeight: 0,
+                // },
+                // icon: {
+                //   url: "{% static 'front/images/camera.png' %}", // Replace with the path to your image
+                //   scaledSize: new google.maps.Size(20, 20), // Adjust icon size
+                //   anchor: new google.maps.Point(10, 10), // Center the icon
+                // },
                 offset: "0",
                 repeat: "7px",
               },
@@ -696,6 +805,19 @@
 
           // Display the polyline on the map
           pathPolyline.setMap(map);
+          var drone_path = pathData.coordinates;
+          drone_path.forEach(function (markerData) {
+            var drone = new google.maps.Marker({
+              position: { lat: markerData.lat, lng: markerData.lng },
+              map: map,
+              icon: {
+                url: "{% static 'front/images/drone.png' %}", // URL to the custom icon image
+                scaledSize: new google.maps.Size(12, 12), // Scale the icon to desired size
+                origin: new google.maps.Point(0, 0), // Origin point of the icon
+                anchor: new google.maps.Point(5, 5) // Anchor point of the icon (centered)
+              }
+            });
+          });
 
           // Add mouseover event for each polyline
           google.maps.event.addListener(pathPolyline, 'mouseover', function (event) {

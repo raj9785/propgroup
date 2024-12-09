@@ -52,7 +52,7 @@ class ProjectForm(forms.ModelForm):
 class DroneVideoForm(forms.ModelForm):
     title = forms.CharField(required=True, label='Title',max_length=50,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
     video_url = forms.URLField(required=False, max_length=255,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
-    path_color_code = forms.CharField(required=True, label='path_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    #path_color_code = forms.CharField(required=True, label='path_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
 
     description = forms.CharField(required=True, label='Description',max_length=80,widget=forms.TextInput(attrs={'class': 'form-control'}))
     state=forms.ModelChoiceField(required=False, 
@@ -66,6 +66,6 @@ class DroneVideoForm(forms.ModelForm):
 
     class Meta:
         model = DroneVideo
-        fields = ("title","video_url","path_color_code","description","state",'city','zone')
+        fields = ("title","video_url","description","state",'city','zone')
 
 

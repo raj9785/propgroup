@@ -209,7 +209,7 @@ textarea.form-control {
 .controls_btn{
     position: absolute;
     top: 11px;
-    left: 234px;
+    left: 179px;
     z-index: 99999;
 }  
 .controls_btn .btn-secondary{

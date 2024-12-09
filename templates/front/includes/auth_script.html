@@ -1,160 +1,170 @@
 <script>
 
-    $(document).ready(function () {
-        $('#login_form').keypress(function (event) {
-            if (event.keyCode === 13) {
-                $('.submit_login').trigger("click");
-            }
-        });
-        $('#register_form').keypress(function(event) {
-            if (event.keyCode === 13) {
-              $('.register_button').trigger("click");
-            }
-          });
+  $(document).ready(function () {
+    $('#login_form').keypress(function (event) {
+      if (event.keyCode === 13) {
+        $('.submit_login').trigger("click");
+      }
+    });
+    $('#register_form').keypress(function (event) {
+      if (event.keyCode === 13) {
+        $('.register_button').trigger("click");
+      }
+    });
 
-          $('#verify_otp_form').keypress(function(event) {
-            if (event.keyCode === 13) {
-              $('.verify_otp').trigger("click");
-            }
-          });
+    $('#verify_otp_form').keypress(function (event) {
+      if (event.keyCode === 13) {
+        $('.verify_otp').trigger("click");
+      }
+    });
 
-          $(document).on("click",".register_button", function () { 
-                form = document.getElementById('register_form');
-                formdata = new FormData(form);
-                $.ajax({
-                  url: "{% url 'ajax_register' %}",
-                  type: "POST",
-                  enctype: 'multipart/form-data',
-                  data: formdata,
-                  dataType: "json",
-                  cache:false,
-                  contentType: false,
-                  processData: false,
-                  beforeSend: function() {
-                     $("#register_button").html(`Please wait...`);
-                     $("#register_button").removeClass('register_button'); 
-                  },
-                  success: function (data) {
-                    var newUser = $('.register_div')
-                    var otpDiv = $('.otp_div')
-                    if (data.error == false) {
-                        newUser.hide();
-                        otpDiv.show();
-                        $("#user_number").text($("#mobile").val());
-                        $("#otpmobile").val($("#mobile").val());
-                        $("#verify_type").val("2")
-                        $("#temp_id").val(data.temp_id);
-                    } else {
-                      $("#register_button").html(`Signup`);
-                      $("#register_button").addClass('register_button');   
-                      var response = "";
-                      response +='<div class="alert alert-danger messagess" role="alert">'+data.message+'</div>';
-                     $(".msg_div_reg").html(response);
-                    }
-                  },
-                 });
-               
+    $(document).on("click", ".register_button", function () {
+      form = document.getElementById('register_form');
+      formdata = new FormData(form);
+      $.ajax({
+        url: "{% url 'ajax_register' %}",
+        type: "POST",
+        enctype: 'multipart/form-data',
+        data: formdata,
+        dataType: "json",
+        cache: false,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+          $("#register_button").html(`Please wait...`);
+          $("#register_button").removeClass('register_button');
+        },
+        success: function (data) {
+          var newUser = $('.register_div')
+          var otpDiv = $('.otp_div')
+          if (data.error == false) {
+            newUser.hide();
+            otpDiv.show();
+            $("#user_number").text($("#mobile").val());
+            $("#otpmobile").val($("#mobile").val());
+            $("#verify_type").val("2")
+            $("#temp_id").val(data.temp_id);
+          } else {
+            $("#register_button").html(`Signup`);
+            $("#register_button").addClass('register_button');
+            var response = "";
+            response += '<div class="alert alert-danger messagess" role="alert">' + data.message + '</div>';
+            $(".msg_div_reg").html(response);
+          }
+        },
+      });
 
-        });
-        
-        
-        $(document).on("click",".verify_otp", function () { 
-           
-           form = document.getElementById('verify_otp_form');
-           formdata = new FormData(form);
-           $.ajax({
-             url: "{% url 'ajax_verify_otp' %}",
-             type: "POST",
-             enctype: 'multipart/form-data',
-             data: formdata,
-             dataType: "json",
-             cache:false,
-             contentType: false,
-             processData: false,
-             beforeSend: function() {
-                $("#verify_otp").html(`Please wait...`);
-                $("#verify_otp").removeClass('verify_otp'); 
-             },
-             success: function (data) {
-               
-               if (data.error == false) {
-                   window.location.reload();
-               } else {
-                 $("#verify_otp").html(`Verify OTP`);
-                 $("#verify_otp").addClass('verify_otp');   
-                 var response = "";
-                 response +='<div class="alert alert-danger messagess" role="alert">'+data.message+'</div>';
-                $(".msg_div_otp").html(response);
-               }
-             },
-            });
-          
-        });
-
-
-        $(document).on("click",".resend_otp", function () { 
-              var formdata = {
-                'username': $("#otpmobile").val(),
-                'verify_type': $("#verify_type").val(),
-                'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token in the formdata
-              };
-                $.ajax({
-                  url: "{% url 'ajax_send_otp' %}",
-                  type: "POST",
-                  enctype: 'multipart/form-data',
-                  data: formdata,
-                  dataType: "json",
-                  headers: { "X-CSRFToken": "{{ csrf_token }}" },
-                  beforeSend: function() {
-                     $("#resend_otp").html(`Please wait...`);
-                     $("#resend_otp").removeClass('resend_otp'); 
-                  },
-                  success: function (data) {
-                    $("#resend_otp").html(`Resend OTP`);
-                    $("#resend_otp").addClass('resend_otp');  
-                    var response = ""; 
-                    if (data.error == false) {
-                       response +='<div class="alert alert-success messagess" role="alert">'+data.message+'</div>';
-                    } else {
-                       response +='<div class="alert alert-danger messagess" role="alert">'+data.message+'</div>';
-                    }
-                    $(".msg_div_otp").html(response);
-                  },
-                 });
- 
-        });
-
-        $(document).on("click", ".submit_login", function () {
-            form = document.getElementById('login_form');
-            formdata = new FormData(form);
-            $.ajax({
-                url: $("#login_form").attr("action"),
-                type: "POST",
-                enctype: 'multipart/form-data',
-                data: formdata,
-                dataType: "json",
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $("#submit_login").html(`Wait...`);
-                    $("#submit_login").removeClass('submit_login');
-                },
-                success: function (data) {
-                    if (data.error == false) {
-                        window.location.reload();
-                    } else {
-                        $("#submit_login").html(`Sign In`);
-                        $("#submit_login").addClass('submit_login');
-                        var response = "";
-                        response += '<div class="alert alert-danger messagess" role="alert">' + data.message + '</div>';
-                        $(".msg_div").html(response);
-                    }
-                },
-            });
-
-        });
 
     });
+
+
+    $(document).on("click", ".verify_otp", function () {
+
+      form = document.getElementById('verify_otp_form');
+      formdata = new FormData(form);
+      $.ajax({
+        url: "{% url 'ajax_verify_otp' %}",
+        type: "POST",
+        enctype: 'multipart/form-data',
+        data: formdata,
+        dataType: "json",
+        cache: false,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+          $("#verify_otp").html(`Please wait...`);
+          $("#verify_otp").removeClass('verify_otp');
+        },
+        success: function (data) {
+
+          if (data.error == false) {
+            if (data.redirect_page) {
+              window.location.href = "{% url 'dashboard' %}?" + data.redirect_page;
+            } else {
+              window.location.reload();
+            }
+          } else {
+            $("#verify_otp").html(`Verify OTP`);
+            $("#verify_otp").addClass('verify_otp');
+            var response = "";
+            response += '<div class="alert alert-danger messagess" role="alert">' + data.message + '</div>';
+            $(".msg_div_otp").html(response);
+          }
+        },
+      });
+
+    });
+
+
+    $(document).on("click", ".resend_otp", function () {
+      var formdata = {
+        'username': $("#otpmobile").val(),
+        'verify_type': $("#verify_type").val(),
+        'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token in the formdata
+      };
+      $.ajax({
+        url: "{% url 'ajax_send_otp' %}",
+        type: "POST",
+        enctype: 'multipart/form-data',
+        data: formdata,
+        dataType: "json",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        beforeSend: function () {
+          $("#resend_otp").html(`Please wait...`);
+          $("#resend_otp").removeClass('resend_otp');
+        },
+        success: function (data) {
+          $("#resend_otp").html(`Resend OTP`);
+          $("#resend_otp").addClass('resend_otp');
+          var response = "";
+          if (data.error == false) {
+            response += '<div class="alert alert-success messagess" role="alert">' + data.message + '</div>';
+          } else {
+            response += '<div class="alert alert-danger messagess" role="alert">' + data.message + '</div>';
+          }
+          $(".msg_div_otp").html(response);
+        },
+      });
+
+    });
+
+    $(document).on("click", ".submit_login", function () {
+      form = document.getElementById('login_form');
+      formdata = new FormData(form);
+      $.ajax({
+        url: $("#login_form").attr("action"),
+        type: "POST",
+        enctype: 'multipart/form-data',
+        data: formdata,
+        dataType: "json",
+        cache: false,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+          $("#submit_login").html(`Wait...`);
+          $("#submit_login").removeClass('submit_login');
+        },
+        success: function (data) {
+          if (data.error == false) {
+            if (data.redirect_page) {
+              window.location.href = "{% url 'dashboard' %}?" + data.redirect_page;
+            } else {
+              window.location.reload();
+            }
+            //window.location.reload();
+
+          } else {
+            $("#submit_login").html(`Sign In`);
+            $("#submit_login").addClass('submit_login');
+            var response = "";
+            response += '<div class="alert alert-danger messagess" role="alert">' + data.message + '</div>';
+            $(".msg_div").html(response);
+          }
+        },
+      });
+
+    });
+
+  });
 
 </script>

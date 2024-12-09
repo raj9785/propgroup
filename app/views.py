@@ -68,6 +68,7 @@ def ajax_login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
+        redirect_to=request.POST['redirect_to']
         if username and username:
             user = authenticate(username=username, password=password)
             if user is not None:
@@ -78,7 +79,13 @@ def ajax_login(request):
                         response_data['message'] = "Logined Successfully"
                         response_data['class'] = "error"
                         response_data['errors'] = ""
-
+                        if redirect_to=="2":
+                            redirect_page="action_type=2"
+                        elif redirect_to=="3":
+                            redirect_page="action_type=3"
+                        else:
+                           redirect_page=""         
+                        response_data['redirect_page'] = redirect_page 
                     else:
                         response_data['error'] = True
                         response_data['message'] = "Account is disabled"
@@ -116,6 +123,7 @@ def ajax_verify_otp(request):
         mobile = request.POST['mobile']
         otp = str(request.POST['otp'])
         verify_type = request.POST['verify_type']
+        redirect_to=request.POST['redirect_to']
         try:
             user_data = MobileOtp.objects.filter(
                 mobile=mobile, otp=otp).order_by('-id').first()
@@ -140,6 +148,13 @@ def ajax_verify_otp(request):
                         response_data['message'] = "Logined Successfully"
                         response_data['class'] = "success"
                         response_data['errors'] = ""
+                        if redirect_to=="2":
+                            redirect_page="action_type=2"
+                        elif redirect_to=="3":
+                            redirect_page="action_type=3"
+                        else:
+                           redirect_page=""         
+                        response_data['redirect_page'] = redirect_page
                     else:
                         response_data['error'] = True
                         response_data['message'] = "Your mobile no not registered with Us"
@@ -792,30 +807,35 @@ def index(request):
 
 def dashboard(request):
     context = {}
-    context['page_name'] = "dashboard"
-    zone_list=get_zone_list()
-    context['zone_list'] = zone_list
-    city_id=1
-    #context['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
-    #context['markers'] = get_markers(city_id)
-    context['drone_video_paths'] = get_drone_video_paths(city_id)
-    city_info=get_city_info(city_id)
-    context['city_info'] =city_info
-    context['city_id'] =city_id
-    boundry_color_code="NONE"
-    if city_info:
-        if city_info.boundry_color_code:
-            boundry_color_code=city_info.boundry_color_code
-    map_fill_color_code="NONE"
-    if city_info:
-        if city_info.map_fill_color_code:
-            map_fill_color_code=city_info.map_fill_color_code
+    action_type=request.GET.get('action_type',"") 
+    if request.user.is_authenticated:
+        context['page_name'] = "dashboard"
+        context['action_type'] = action_type
+        zone_list=get_zone_list()
+        context['zone_list'] = zone_list
+        city_id=1
+        #context['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
+        #context['markers'] = get_markers(city_id)
+        context['drone_video_paths'] = get_drone_video_paths(city_id)
+        city_info=get_city_info(city_id)
+        context['city_info'] =city_info
+        context['city_id'] =city_id
+        boundry_color_code="NONE"
+        if city_info:
+            if city_info.boundry_color_code:
+                boundry_color_code=city_info.boundry_color_code
+        map_fill_color_code="NONE"
+        if city_info:
+            if city_info.map_fill_color_code:
+                map_fill_color_code=city_info.map_fill_color_code
 
 
-    context['boundry_color_code'] =boundry_color_code
-    context['map_fill_color_code'] =map_fill_color_code
+        context['boundry_color_code'] =boundry_color_code
+        context['map_fill_color_code'] =map_fill_color_code
 
-    return render(request, 'front/home.html', context)
+        return render(request, 'front/home.html', context)
+    else:
+        return redirect("/")
 
 
 def zone_list(request):

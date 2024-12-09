@@ -13,6 +13,7 @@
 
                 <form id="login_form" class="mt-4" action={% url 'ajax_login' %} method='POST'>
                     {% csrf_token %}
+                    <input type="hidden" name="redirect_to" class="redirect_to" >
                     <div class="form-group">
                         <label for="pxp-signin-email">Email</label>
                         <input type="text" class="form-control" name="username" id="pxp-signin-email"
@@ -57,6 +58,7 @@
                 <h5 class="modal-title" id="pxpSignupModal">Create an account</h5>
                 <div class="register_div">
                     <form id="register_form" class="mt-4" action={% url 'ajax_register' %} method='POST'>
+                        <input type="hidden" name="redirect_to" class="redirect_to" >
                         {% csrf_token %}
                         <!-- <div class="row">
                         <div class="col-6">
@@ -110,6 +112,7 @@
                 <div class="otp_div" id="otp_div" style="display: none;">
                     <form id="verify_otp_form" class="mt-4" action={% url 'ajax_verify_otp' %} method='POST'>
                         {% csrf_token %}
+                        <input type="hidden" name="redirect_to" class="redirect_to" >
                         <div class="form-group">
                             <label class="label" for="signupName">Enter the 4 digits OTP received on <span
                                     id="user_number">
