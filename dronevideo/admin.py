@@ -14,7 +14,7 @@ class DroneVideoPathAdmin(admin.StackedInline):
     extra = 1  
 
 class DroneVideoAdmin(admin.ModelAdmin):
-    list_display = ('video_url','title',"city",'state','zone','is_active')
+    list_display = ('user','video_url','title',"city",'state','zone','is_active')
     list_per_page = 25
     inlines = [DroneVideoPathAdmin,]
     

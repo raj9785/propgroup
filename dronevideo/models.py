@@ -1,5 +1,6 @@
 from django.db import models
 from app.models import Zone,City,State
+from django.contrib.auth.models import User
 
 class DroneVideo(models.Model):
     state = models.ForeignKey(
@@ -13,6 +14,8 @@ class DroneVideo(models.Model):
     description = models.TextField(blank=True, null=True)
     path_color_code = models.CharField(max_length=7, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=False, related_name='user_video')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

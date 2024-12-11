@@ -20,4 +20,4 @@ class LandmarkAdmin(admin.ModelAdmin):
     # def has_add_permission(self, request, obj=None):
     #     return False
 
-admin.site.register(Landmark, LandmarkAdmin)
+#admin.site.register(Landmark, LandmarkAdmin)

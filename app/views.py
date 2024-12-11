@@ -376,9 +376,22 @@ def ajax_send_otp(request):
 
 
 def get_youtube_video_id(url):
-    parsed_url = urlparse(url)
-    query_params = parse_qs(parsed_url.query)
-    return query_params.get('v', [None])[0]
+    video_id = None
+    
+    if "youtube.com/watch?v=" in url:  # Regular video URL
+        video_id = url.split("youtube.com/watch?v=")[1].split("&")[0]
+    elif "youtube.com/shorts/" in url:  # Shorts URL
+        video_id = url.split("youtube.com/shorts/")[1].split("?")[0]
+    elif "youtu.be/" in url:  # Shortened URL
+        video_id = url.split("youtu.be/")[1].split("?")[0]
+    
+    return video_id
+
+
+# def get_youtube_video_id(url):
+#     parsed_url = urlparse(url)
+#     query_params = parse_qs(parsed_url.query)
+#     return query_params.get('v', [None])[0]
 
 def ajax_get_video_list(request):
     city_id = request.GET.get('city_id') 
@@ -662,7 +675,7 @@ def save_map(request):
             landmark_form = LandmarkForm(data,files)
             if landmark_form.is_valid():
                 landmark = landmark_form.save(commit=False)
-                #landmark.event_id = event_id
+                landmark.user_id = userdata.id
                 
                 landmark.save()
                 # data._mutable = _mutable
@@ -680,7 +693,7 @@ def save_map(request):
               project_form = ProjectForm(data,files)
               if project_form.is_valid():
                     project = project_form.save(commit=False)
-                    #landmark.event_id = event_id
+                    project.user_id = userdata.id
                     
                     project.save()
                     # data._mutable = _mutable
@@ -703,7 +716,7 @@ def save_map(request):
                             drone_video_form = DroneVideoForm(data)
                             if drone_video_form.is_valid():
                                     drone_video = drone_video_form.save(commit=False)
-                                    #landmark.event_id = event_id
+                                    drone_video.user_id = userdata.id
                                     
                                     drone_video.save()
                                     # data._mutable = _mutable
