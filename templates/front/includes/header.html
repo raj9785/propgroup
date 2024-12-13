@@ -20,18 +20,35 @@
                     <li class="list-inline-item">
                         {% if user.is_authenticated %}
                         {% if page_name == "dashboard" %}
-                            <a href="#" onclick="take_action('3')">Drone Video</a>
+                        <a href="#" onclick="take_action('3')">Drone Video</a>
                         {%else%}
-                            <a href="/dashboard?action_type=3">Drone Video</a>
+                        <a href="/dashboard?action_type=3">Drone Video</a>
                         {% endif %}
 
-                        
+
                         {%else%}
                         <a href="#" action_id="3" class="pxp-signin-trigger">Drone Video</a>
                         {% endif %}
 
 
                     </li>
+
+                    {% if user.is_authenticated and user.is_superuser %}
+                    <li class="list-inline-item">
+                        <a href="#">Manage Masters</a>
+                        <ul class="pxp-nav-sub rounded-lg">
+                            <li>
+                                <a href="#" onclick="take_action('4')">Add Zone</a>
+                            </li>
+                            <li>
+                                <a href="#" onclick="take_action('5')">Add City</a>
+                            </li>
+                            <li>
+                                <a href="#" onclick="take_action('6')">Add Location</a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
 
 
                     <li class="list-inline-item">

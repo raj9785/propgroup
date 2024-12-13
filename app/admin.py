@@ -98,7 +98,7 @@ class ZoneBoundryAdmin(admin.ModelAdmin):
     # def has_add_permission(self, request, obj=None):
     #     return False
 
-admin.site.register(ZoneBoundry, ZoneBoundryAdmin)
+#admin.site.register(ZoneBoundry, ZoneBoundryAdmin)
 
 
 class LocationAdmin(admin.ModelAdmin):
@@ -125,5 +125,5 @@ class LocationBoundryAdmin(admin.ModelAdmin):
     # def has_add_permission(self, request, obj=None):
     #     return False
 
-admin.site.register(LocationBoundry, LocationBoundryAdmin)
+#admin.site.register(LocationBoundry, LocationBoundryAdmin)
 

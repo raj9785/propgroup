@@ -16,7 +16,7 @@ class DroneVideoPathAdmin(admin.StackedInline):
 class DroneVideoAdmin(admin.ModelAdmin):
     list_display = ('user','video_url','title',"city",'state','zone','is_active')
     list_per_page = 25
-    inlines = [DroneVideoPathAdmin,]
+    #inlines = [DroneVideoPathAdmin,]
     
     # def has_delete_permission(self, request, obj=None):
     #     return False 
@@ -41,4 +41,4 @@ class DroneVideoAdminLeftPanel(admin.ModelAdmin):
     # def has_add_permission(self, request, obj=None):
     #     return False
 
-admin.site.register(DroneVideoPath, DroneVideoAdminLeftPanel)
+#admin.site.register(DroneVideoPath, DroneVideoAdminLeftPanel)

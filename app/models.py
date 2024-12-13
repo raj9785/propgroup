@@ -54,8 +54,8 @@ class City(models.Model):
         State, on_delete=models.CASCADE, null=True, blank=False, related_name='state_list')
     city_name = models.CharField(max_length=50, null=True, blank=False)
     sequence_number = models.IntegerField(blank=False, default=1, null=True)
-    boundry_file = models.FileField(upload_to='city_boundry/',
-                             verbose_name="City Boundry", null=True, blank=False,max_length=255)
+    # boundry_file = models.FileField(upload_to='city_boundry/',
+    #                          verbose_name="City Boundry", null=True, blank=False,max_length=255)
     boundry_color_code = models.CharField(max_length=7, null=True, blank=True)
     map_fill_color_code = models.CharField(max_length=7, null=True, blank=True)
 
@@ -68,6 +68,7 @@ class City(models.Model):
     map_max_zoom = models.IntegerField(blank=False, default=20, null=True)
 
     is_active = models.BooleanField(default=True)
+    boundry_json = models.JSONField(blank=True, null=True) 
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -96,6 +97,7 @@ class Zone(models.Model):
     population = models.CharField(max_length=20, null=True, blank=True,default="NULL")
     area = models.CharField(max_length=20, null=True, blank=True,default="NULL")
     traffic = models.CharField(max_length=20, null=True, blank=True,default="NORMAL")
+    boundry_json = models.JSONField(blank=True, null=True) 
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -129,13 +131,14 @@ class Location(models.Model):
     zone = models.ForeignKey(
         Zone, on_delete=models.CASCADE, null=True, blank=False, related_name='location_zone_list')
     location_name = models.CharField(max_length=50, null=True, blank=False)
-    boundry_color_code = models.CharField(max_length=7, null=True, blank=False,default="#000000")
+    boundry_color_code = models.CharField(max_length=7, null=True, blank=True,default="#000000")
     fill_color_code = models.CharField(max_length=7, null=True, blank=True)
     name_color_code = models.CharField(max_length=7, null=True, blank=True,default="#000000")
 
 
-    sequence_number = models.IntegerField(blank=False, default=1, null=True)
+    sequence_number = models.IntegerField(blank=True, default=1, null=True)
     is_active = models.BooleanField(default=True)
+    boundry_json = models.JSONField(blank=True, null=True) 
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

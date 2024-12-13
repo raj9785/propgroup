@@ -69,3 +69,40 @@ class DroneVideoForm(forms.ModelForm):
         fields = ("title","video_url","description","state",'city','zone')
 
 
+class ZoneForm(forms.ModelForm):
+    zone_name = forms.CharField(required=True, label='Title',max_length=50,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    zone_color_code = forms.CharField(required=False, label='zone_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    name_color_code = forms.CharField(required=False, label='name_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    population = forms.CharField(required=False, label='population',max_length=20,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    area = forms.CharField(required=False, label='area',max_length=20,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    traffic = forms.CharField(required=False, label='traffic',max_length=20,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'})) 
+    state=forms.ModelChoiceField(required=False, 
+        queryset=State.objects.filter(is_active=True),empty_label="Select State",widget=forms.Select(attrs={'class': 'form-control'})) 
+    city=forms.ModelChoiceField(required=False, 
+        queryset=City.objects.filter(is_active=True),empty_label="Select City",widget=forms.Select(attrs={'class': 'form-control'})) 
+    
+   
+
+    class Meta:
+        model = Zone
+        fields = ("zone_name","zone_color_code","name_color_code","population","area","traffic","state",'city')
+
+
+class CityForm(forms.ModelForm): 
+    city_name = forms.CharField(required=True, label='Title',max_length=50,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    boundry_color_code = forms.CharField(required=False, label='boundry_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    map_fill_color_code = forms.CharField(required=False, label='map_fill_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    center_latitude = forms.CharField(required=False, label='center_latitude',max_length=20,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    center_longitude = forms.CharField(required=False, label='center_longitude',max_length=20,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    map_zoom = forms.IntegerField(required=False, label='map_zoom',widget=forms.TextInput(attrs={'class': 'form-control alphaonly'})) 
+    map_min_zoom = forms.IntegerField(required=False, label='map_min_zoom',widget=forms.TextInput(attrs={'class': 'form-control alphaonly'})) 
+    map_max_zoom = forms.IntegerField(required=False, label='map_max_zoom',widget=forms.TextInput(attrs={'class': 'form-control alphaonly'})) 
+    state=forms.ModelChoiceField(required=False, 
+        queryset=State.objects.filter(is_active=True),empty_label="Select State",widget=forms.Select(attrs={'class': 'form-control'})) 
+    
+    
+   
+
+    class Meta:
+        model = City
+        fields = ("city_name","boundry_color_code","map_fill_color_code","center_latitude","center_longitude","map_zoom","map_min_zoom",'map_max_zoom','state')

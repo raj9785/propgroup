@@ -18,6 +18,7 @@ class DroneVideo(models.Model):
         User, on_delete=models.CASCADE, null=True, blank=False, related_name='user_video')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    path_json = models.JSONField(blank=True, null=True) 
 
     class Meta:
         unique_together = ('state','city','zone','video_url')

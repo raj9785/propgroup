@@ -28,10 +28,11 @@
   }
 
   function clear_btn_text() {
-    if (action_type == "3") {
-      $("#clearPathButton").html("Undo All");
-    } else {
+    if (action_type == "2") {
       $("#clearPathButton").html("Undo");
+
+    } else {
+      $("#clearPathButton").html("Undo All");
     }
   }
 
@@ -45,8 +46,8 @@
 
       // Redraw the polyline
       drawPath(map);
-      markers_length=markers.length;
-      if(markers_length==0){
+      markers_length = markers.length;
+      if (markers_length == 0) {
         $(".controls_btn").hide();
       }
     } else {
@@ -127,7 +128,7 @@
     $(document).on("click", ".submit_map", function () {
       form = document.getElementById("map_form");
       formdata = new FormData(form);
-      if ($("#id_action_type").val() == "3") {
+      if ($("#id_action_type").val() == "3" || $("#id_action_type").val() == "4" || $("#id_action_type").val() == "5" || $("#id_action_type").val() == "6") {
         formdata.append("latlongs", JSON.stringify(pathCoordinatesD));
       }
 
@@ -246,14 +247,14 @@
 
 
 
-    const paths = coordinates.map(coord => ({
-      lat: coord[1],
-      lng: coord[0]
-    }));
+    // const paths = coordinates.map(coord => ({
+    //   lat: coord[1],
+    //   lng: coord[0]
+    // }));
 
     // Create and display the polygon
     const polygonMap = new google.maps.Polygon({
-      paths,
+      path: coordinates,
       strokeColor: boundry_color_code,
       strokeOpacity: strokeOpacity,
       strokeWeight: 2,
@@ -317,20 +318,23 @@
 
     // Load the GeoJSON file
 
-    const geojson = await fetchGeoJSON('{{city_info.boundry_file.url}}');
-    if (!geojson) return;
+    // const geojson = await fetchGeoJSON('{{city_info.boundry_file.url}}');
+    // if (!geojson) return;
 
-    geojson.features.forEach((feature) => {
-      const { type } = feature.geometry;
+    // geojson.features.forEach((feature) => {
+    //   const { type } = feature.geometry;
 
-      if (type === "Polygon") {
-        createPolygon(feature.geometry.coordinates[0], map);
-      } else if (type === "MultiPolygon") {
-        feature.geometry.coordinates.forEach(polygonCoords => {
-          createPolygon(polygonCoords[0], map);
-        });
-      }
-    });
+    //   if (type === "Polygon") {
+    //     createPolygon(feature.geometry.coordinates[0], map);
+    //   } else if (type === "MultiPolygon") {
+    //     feature.geometry.coordinates.forEach(polygonCoords => {
+    //       createPolygon(polygonCoords[0], map);
+    //     });
+    //   }
+    // });
+    const geojson={{city_info.boundry_json|safe}}
+    createPolygon(geojson, map);
+    
 
     map.addListener("click", (event) => {
       const lat = event.latLng.lat(); // Latitude
@@ -344,7 +348,7 @@
       // infoWindow.open(map);
       if (page_name == "dashboard" && map_edit == true) {
         $(".controls_btn").show();
-        if (action_type != "3") {
+        if (action_type == "2") {
           clearPath();
           $("#clearPathButton").hide();
           $("#single_remove").show();
@@ -358,12 +362,20 @@
           //   scale: 2, // Hide the default marker icon
           // }
           $("#clearPathButton").show();
-          var icon_path = {
-            url: "{% static 'front/images/drone.png' %}", // URL to the custom icon image
-            scaledSize: new google.maps.Size(12, 12), // Scale the icon to desired size
-            origin: new google.maps.Point(0, 0), // Origin point of the icon
-            anchor: new google.maps.Point(5, 5) // Anchor point of the icon (centered)
+          if (action_type == "3") {
+            var icon_path = {
+              url: "{% static 'front/images/drone.png' %}", // URL to the custom icon image
+              scaledSize: new google.maps.Size(12, 12), // Scale the icon to desired size
+              origin: new google.maps.Point(0, 0), // Origin point of the icon
+              anchor: new google.maps.Point(5, 5) // Anchor point of the icon (centered)
+            }
+          } else if (action_type == "4" || action_type == "5" || action_type == "6") {
+            var icon_path = {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 2, // Hide the default marker icon
+            }
           }
+
         }
 
         const marker_clicked = new google.maps.Marker({
@@ -807,12 +819,23 @@
           // Display the polyline on the map
           pathPolyline.setMap(map);
           var drone_path = pathData.coordinates;
-          drone_path.forEach(function (markerData) {
+          drone_path.forEach(function (markerData, index) {
+            if (index === 0) {
+              // First marker
+              iconUrl = "{% static 'front/images/first_drone.png' %}";
+            } else if (index === drone_path.length - 1) {
+              // Last marker
+              iconUrl = "{% static 'front/images/last_drone.png' %}";
+            } else {
+              // Middle markers
+              iconUrl = "{% static 'front/images/drone.png' %}";
+            }
+
             var drone = new google.maps.Marker({
               position: { lat: markerData.lat, lng: markerData.lng },
               map: map,
               icon: {
-                url: "{% static 'front/images/drone.png' %}", // URL to the custom icon image
+                url: iconUrl, // URL to the custom icon image
                 scaledSize: new google.maps.Size(12, 12), // Scale the icon to desired size
                 origin: new google.maps.Point(0, 0), // Origin point of the icon
                 anchor: new google.maps.Point(5, 5) // Anchor point of the icon (centered)

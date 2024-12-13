@@ -8,7 +8,7 @@
     {{map_form.latitude}}
     {{map_form.longitude}}
 
-    
+
     <input type="hidden" name="state" value="1" id="id_state">
     <input type="hidden" name="city" value="1" id="id_city">
     <input type="hidden" name="zone" value="1" id="id_zone">
@@ -57,7 +57,7 @@
         <label for="id_icon">Image</label>
         {{map_form.image}}
     </div>
-    {% else %}
+    {% elif action_type == "3" %}
     <input type="hidden" name="state" value="1" id="id_state">
     <input type="hidden" name="city" value="1" id="id_city">
     <input type="hidden" name="zone" value="1" id="id_zone">
@@ -74,10 +74,105 @@
         <label for="id_description">Description</label>
         {{map_form.description}}
     </div>
-    <!-- <div class="form-group">
-        <label for="id_name">Path Color Code (HEX Code)</label>
-        {{map_form.path_color_code}}
-    </div> -->
+    {% elif action_type == "4" %}
+    <input type="hidden" name="state" value="1" id="id_state">
+    <input type="hidden" name="city" value="1" id="id_city">
+
+
+
+    <div class="form-group">
+        <label for="id_name">Zone Name</label>
+        {{map_form.zone_name}}
+    </div>
+    <div class="form-group">
+        <label for="id_description">Zone Color Code (Hex Code)</label>
+        {{map_form.zone_color_code}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Name Color Code (HEX Code)</label>
+        {{map_form.name_color_code}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Population</label>
+        {{map_form.population}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Area</label>
+        {{map_form.area}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Traffic</label>
+        {{map_form.traffic}}
+    </div>
+
+    {% elif action_type == "5" %}
+    <input type="hidden" name="state" value="1" id="id_state">
+    <div class="form-group">
+        <label for="id_city_name">City Name</label>
+        {{map_form.city_name}}
+    </div>
+    <div class="form-group">
+        <label for="id_boundry_color_code">Boundry Color Code</label>
+        {{map_form.boundry_color_code}}
+    </div>
+    <div class="form-group">
+        <label for="id_map_fill_color_code">Map Fill Color Code</label>
+        {{map_form.map_fill_color_code}}
+    </div>
+    <div class="form-group">
+        <label for="id_center_latitude">Center Latitude</label>
+        {{map_form.center_latitude}}
+    </div>
+    <div class="form-group">
+        <label for="id_center_longitude">Center Longitude</label>
+        {{map_form.center_longitude}}
+    </div>
+    <div class="form-group">
+        <label for="id_map_zoom">Map Zoom</label>
+        {{map_form.map_zoom}}
+    </div>
+
+    <div class="form-group">
+        <label for="id_map_min_zoom">Map Min Zoom</label>
+        {{map_form.map_min_zoom}}
+    </div>
+
+    <div class="form-group">
+        <label for="id_map_max_zoom">Map Max Zoom</label>
+        {{map_form.map_max_zoom}}
+    </div>
+
+
+    {% else %}
+    <input type="hidden" name="state" value="1" id="id_state">
+    <input type="hidden" name="city" value="1" id="id_city">
+
+
+
+    <div class="form-group">
+        <label for="id_name">Zone Name</label>
+        {{map_form.zone_name}}
+    </div>
+    <div class="form-group">
+        <label for="id_description">Zone Color Code (Hex Code)</label>
+        {{map_form.zone_color_code}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Name Color Code (HEX Code)</label>
+        {{map_form.name_color_code}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Population</label>
+        {{map_form.population}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Area</label>
+        {{map_form.area}}
+    </div>
+    <div class="form-group">
+        <label for="id_name">Traffic</label>
+        {{map_form.traffic}}
+    </div>
     {% endif %}
     <div class="form-group">
         <button type="button" class="pxp-agent-contact-modal-btn submit_map" id="submit_map">Submit</button>

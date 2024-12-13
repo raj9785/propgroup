@@ -20,7 +20,7 @@ import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import LandmarkForm,ProjectForm,DroneVideoForm
+from .forms import LandmarkForm,ProjectForm,DroneVideoForm,ZoneForm,CityForm
 def add_time(addminutes):
     itc_timezone = pytz.timezone('Asia/Kolkata')
     current_datetime_itc = timezone.now().astimezone(itc_timezone)
@@ -427,7 +427,10 @@ def get_zone_list(city_id=1):
 
 
 def get_city_info(city_id=1):
-    city_info =City.objects.get(id=city_id)
+    try:
+        city_info = City.objects.get(id=city_id)
+    except City.DoesNotExist:
+        city_info = None
     return city_info
 
 def ajax_polygons(request):
@@ -495,10 +498,10 @@ def get_zones_with_boundaries(city_id):
     zones_data = []
     for zone in zones:
         # Get all boundary points for the zone, ordered by sequence number
-        boundaries = ZoneBoundry.objects.filter(zone=zone).order_by('sequence_number')
+        #boundaries = ZoneBoundry.objects.filter(zone=zone).order_by('sequence_number')
         
         # Format boundary coordinates for the frontend
-        boundary_coords = [{"lat": float(boundary.latitude), "lng": float(boundary.longitude)} for boundary in boundaries]
+        #boundary_coords = [{"lat": float(boundary.latitude), "lng": float(boundary.longitude)} for boundary in boundaries]
         
         # Add zone information and its boundaries
         if zone.zone_color_code:
@@ -513,7 +516,7 @@ def get_zones_with_boundaries(city_id):
             "area":zone.area,
             "traffic":zone.traffic,
             "color": color_code,
-            "coords": boundary_coords
+            "coords": zone.boundry_json,
         })
     
     return zones_data
@@ -589,9 +592,9 @@ def get_drone_video_paths(city_id):
     video_list=""
     for drone in drones:
         # Get all boundary points for the zone, ordered by sequence number
-        drone_path_list= DroneVideoPath.objects.filter(drone_video=drone).order_by('sequence_number')
+        #drone_path_list= DroneVideoPath.objects.filter(drone_video=drone).order_by('sequence_number')
         # Format boundary coordinates for the frontend
-        path_coords = [{"lat": float(drone_path.latitude), "lng": float(drone_path.longitude)} for drone_path in drone_path_list]
+        #path_coords = [{"lat": float(drone_path.latitude), "lng": float(drone_path.longitude)} for drone_path in drone_path_list]
         # Add zone information and its boundaries
         if drone.path_color_code:
             color_code=drone.path_color_code
@@ -614,7 +617,7 @@ def get_drone_video_paths(city_id):
             "title": drone.title,
             "color": color_code,
             "html_data":video_list,
-            "coordinates": path_coords
+            "coordinates": drone.path_json,
         })
     
     return drone_data
@@ -635,8 +638,8 @@ def find_zone(request):
     if zone_list: 
         for zone_data in zone_list:
             polygon_coords=[]
-            zone_path_list= ZoneBoundry.objects.filter(zone_id=zone_data.id)
-            polygon_coords = [(float(loc.longitude), float(loc.latitude)) for loc in zone_path_list]
+            zone_path_list= zone_data.boundry_json
+            polygon_coords = [(float(loc["lng"]), float(loc["lat"])) for loc in zone_path_list]
             polygon = Polygon(polygon_coords)
 
             # Define the point
@@ -707,6 +710,82 @@ def save_map(request):
                     response_data['error_type'] = '2'
                     response_data['message'] = ""
                     response_data['errors'] = project_form.errors
+           elif action_type=="4":
+                latlongs= request.POST['latlongs']
+                if latlongs:
+                    try:
+                        path_coordinates = json.loads(latlongs)
+                        if path_coordinates:
+                            Zone_form = ZoneForm(data)
+                            if Zone_form.is_valid():
+                                    zone = Zone_form.save(commit=False)
+                                    zone.boundry_json = path_coordinates
+                                  
+                                    
+                                    zone.save()
+                                    
+
+                                    response_data['error'] = False
+                                    response_data['message'] = "Zone added Successfully"
+                                    response_data['class'] = "success"
+                                    response_data['errors'] = ""
+                            else:
+                                    response_data['error'] = True
+                                    response_data['class'] = 'error'
+                                    response_data['error_type'] = '2'
+                                    response_data['message'] = ""
+                                    response_data['errors'] = Zone_form.errors
+                        
+                        
+                        else:
+                            response_data['error'] = True
+                            response_data['message'] = "* Draw Zone on Map"
+                            response_data['class'] = "error"
+                            response_data['errors'] = ""  
+
+                    except json.JSONDecodeError as e:
+                            response_data['error'] = True
+                            response_data['message'] = "* Invalid JSON format"
+                            response_data['class'] = "error"
+                            response_data['errors'] = ""                    
+           elif action_type=="5":
+                latlongs= request.POST['latlongs']
+                if latlongs:
+                    try:
+                        path_coordinates = json.loads(latlongs)
+                        if path_coordinates:
+                            City_form = CityForm(data)
+                            if City_form.is_valid():
+                                    city = City_form.save(commit=False)
+                                    city.boundry_json = path_coordinates
+                                  
+                                    
+                                    city.save()
+                                    
+
+                                    response_data['error'] = False
+                                    response_data['message'] = "City added Successfully"
+                                    response_data['class'] = "success"
+                                    response_data['errors'] = ""
+                            else:
+                                    response_data['error'] = True
+                                    response_data['class'] = 'error'
+                                    response_data['error_type'] = '2'
+                                    response_data['message'] = ""
+                                    response_data['errors'] = City_form.errors
+                        
+                        
+                        else:
+                            response_data['error'] = True
+                            response_data['message'] = "* Draw City on Map"
+                            response_data['class'] = "error"
+                            response_data['errors'] = ""  
+
+                    except json.JSONDecodeError as e:
+                            response_data['error'] = True
+                            response_data['message'] = "* Invalid JSON format"
+                            response_data['class'] = "error"
+                            response_data['errors'] = ""                    
            else:
                 latlongs= request.POST['latlongs']
                 if latlongs:
@@ -717,17 +796,24 @@ def save_map(request):
                             if drone_video_form.is_valid():
                                     drone_video = drone_video_form.save(commit=False)
                                     drone_video.user_id = userdata.id
+                                    drone_video.path_json = path_coordinates
+                                    # zone_path = []
+                                    # for index, path_coordinate in enumerate(path_coordinates): 
+                                    #         latlng={}
+                                    #         latlng['lat'] = path_coordinate['lat']
+                                    #         latlng['lng'] = path_coordinate['lng']        
+                                    #         zone_path.insert(index, latlng)
                                     
                                     drone_video.save()
                                     # data._mutable = _mutable
-                                
-                                    for index, path_coordinate in enumerate(path_coordinates):    
-                                        drone_video_path = DroneVideoPath()
-                                        drone_video_path.drone_video = drone_video
-                                        drone_video_path.latitude = path_coordinate['lat']
-                                        drone_video_path.longitude = path_coordinate['lng']
-                                        drone_video_path.sequence_number = index+1
-                                        drone_video_path.save() 
+                                   
+                                    # for index, path_coordinate in enumerate(path_coordinates):    
+                                    #     drone_video_path = DroneVideoPath()
+                                    #     drone_video_path.drone_video = drone_video
+                                    #     drone_video_path.latitude = path_coordinate['lat']
+                                    #     drone_video_path.longitude = path_coordinate['lng']
+                                    #     drone_video_path.sequence_number = index+1
+                                    #     drone_video_path.save() 
 
                                     response_data['error'] = False
                                     response_data['message'] = "Request Sent Successfully"
@@ -777,13 +863,23 @@ def get_map_form(request):
     elif action_type=="2":
         title="Add Project"
         context['map_form'] = ProjectForm()
-    else:
+    elif action_type=="3":
         title="Add Drone Video"
-        context['map_form'] = DroneVideoForm()       
+        context['map_form'] = DroneVideoForm() 
+    elif action_type=="4":
+        title="Zone Information"
+        context['map_form'] = ZoneForm() 
+    elif action_type=="5":
+        title="City Information"
+        context['map_form'] = CityForm()           
+    else:
+        title="Zone Information"
+        context['map_form'] = ZoneForm()       
 
     context['page_title'] = title
     context['action_type'] = action_type
     context['city_id'] =city_id
+    
    
 
     return render(request, 'front/includes/map_forms.html', context)
@@ -801,8 +897,21 @@ def index(request):
     #context['markers'] = get_markers(city_id)
     context['drone_video_paths'] = get_drone_video_paths(city_id)
     city_info=get_city_info(city_id)
-    context['city_info'] =city_info
-    context['city_id'] =city_id
+    if city_info is not None:
+        context['city_info'] =city_info
+        context['city_id'] =city_id
+    else:
+        city_info_none={}
+        city_info_none['map_zoom']=4
+        city_info_none['map_min_zoom']=4
+        city_info_none['map_max_zoom']=20
+        city_info_none['boundry_color_code']="#000000"
+        city_info_none['map_fill_color_code']="#000000"
+        city_info_none['center_latitude']="20.5937"
+        city_info_none['center_longitude']="78.9629"
+        context['city_info'] =city_info_none
+        context['city_id'] =city_id
+
     boundry_color_code="NONE"
     if city_info:
         if city_info.boundry_color_code:
@@ -831,8 +940,20 @@ def dashboard(request):
         #context['markers'] = get_markers(city_id)
         context['drone_video_paths'] = get_drone_video_paths(city_id)
         city_info=get_city_info(city_id)
-        context['city_info'] =city_info
-        context['city_id'] =city_id
+        if city_info is not None:
+            context['city_info'] =city_info
+            context['city_id'] =city_id
+        else:
+            city_info_none={}
+            city_info_none['map_zoom']=4
+            city_info_none['map_min_zoom']=4
+            city_info_none['map_max_zoom']=20
+            city_info_none['boundry_color_code']="#000000"
+            city_info_none['map_fill_color_code']="#000000"
+            city_info_none['center_latitude']="20.5937"
+            city_info_none['center_longitude']="78.9629"
+            context['city_info'] =city_info_none
+            context['city_id'] =city_id
         boundry_color_code="NONE"
         if city_info:
             if city_info.boundry_color_code:
