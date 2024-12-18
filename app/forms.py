@@ -106,3 +106,24 @@ class CityForm(forms.ModelForm):
     class Meta:
         model = City
         fields = ("city_name","boundry_color_code","map_fill_color_code","center_latitude","center_longitude","map_zoom","map_min_zoom",'map_max_zoom','state')
+
+
+
+class LocationForm(forms.ModelForm): 
+    location_name = forms.CharField(required=True, label='Title',max_length=50,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    boundry_color_code = forms.CharField(required=False, label='boundry_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    fill_color_code = forms.CharField(required=False, label='fill_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    name_color_code = forms.CharField(required=False, label='name_color_code',max_length=7,widget=forms.TextInput(attrs={'class': 'form-control alphaonly'}))
+    state=forms.ModelChoiceField(required=False, 
+        queryset=State.objects.filter(is_active=True),empty_label="Select State",widget=forms.Select(attrs={'class': 'form-control'})) 
+    city=forms.ModelChoiceField(required=False, 
+        queryset=City.objects.filter(is_active=True),empty_label="Select City",widget=forms.Select(attrs={'class': 'form-control'})) 
+    zone=forms.ModelChoiceField(required=False, 
+        queryset=Zone.objects.filter(is_active=True),empty_label="Select Zone",widget=forms.Select(attrs={'class': 'form-control'})) 
+    
+    
+   
+
+    class Meta:
+        model = Location
+        fields = ("location_name","boundry_color_code","fill_color_code","name_color_code","state","city",'zone')

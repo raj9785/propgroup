@@ -32,10 +32,10 @@ urlpatterns = [
     path('', views.index, name="index"),
     path('dashboard', views.dashboard, name="dashboard"),
     path('zone_list', views.zone_list,name="zone_list"),
-    path('saveroute', views.saveroute,name="saveroute"),
+    #path('saveroute', views.saveroute,name="saveroute"),
     path('location_list', views.location_list,name="location_list"),
     path('get_video_list', views.get_video_list,name="get_video_list"),
-    path('savelocationboundry', views.savelocationboundry,name="savelocationboundry"),
+    #path('savelocationboundry', views.savelocationboundry,name="savelocationboundry"),
     path('save_drone_path_video', views.save_drone_path_video,name="save_drone_path_video"),
     path('ajax_login', views.ajax_login, name="ajax_login"),
     path('ajax_verify_otp', views.ajax_verify_otp, name="ajax_verify_otp"),
@@ -49,6 +49,7 @@ urlpatterns = [
     path('get_map_form', views.get_map_form, name="get_map_form"),
     path('save_map', views.save_map, name="save_map"),
     path('find_zone', views.find_zone, name="find_zone"),
+    path('zones', views.zones, name="zones"),
     path('logout', views.logout_view, name = 'logout'), 
 ] 
 if settings.DEBUG:

@@ -222,6 +222,8 @@ textarea.form-control {
 
 }
 
+
+
 .controls_btn .btn-secondary:hover{
   background-color: #EBEBEB;
   border-color:  #EBEBEB;
@@ -249,6 +251,25 @@ textarea.form-control {
   border-color:  #EBEBEB;
   
 }
+
+.area_information{
+    position: absolute;
+    top: 90px;
+    right: 10px;
+    z-index: 99999;
+    
+  
+    background-color: rgba(128, 128, 128, 0.7); /* Transparent gray */
+    color: #FFF;
+    padding: 20px;
+    margin: 20px auto;
+    text-align: center;
+    border-radius: 0px;
+    max-width: 800px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
+  }
+  
 
 .pxp-nav-tabs .nav-link {
     margin-right: 20px;

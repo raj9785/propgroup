@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Zone,ZoneBoundry,Location,LocationBoundry,City,TempUser,MobileOtp,UserProfile
+from .models import Zone,Location,City,TempUser,MobileOtp,UserProfile
 from landmark.models import Landmark
 from projects.models import Project
 from dronevideo.models import DroneVideo,DroneVideoPath
@@ -20,7 +20,7 @@ import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import LandmarkForm,ProjectForm,DroneVideoForm,ZoneForm,CityForm
+from .forms import LandmarkForm,ProjectForm,DroneVideoForm,ZoneForm,CityForm,LocationForm
 def add_time(addminutes):
     itc_timezone = pytz.timezone('Asia/Kolkata')
     current_datetime_itc = timezone.now().astimezone(itc_timezone)
@@ -420,8 +420,14 @@ def get_video_list(request):
     respone = JsonResponse(data)
     return respone
 
-def get_zone_list(city_id=1):
-    zone_list = Zone.objects.filter(is_active=True,city_id=city_id)
+def get_zone_list(city_id=1,zone_id=""):
+   
+    if zone_id:
+        zone_id=int(zone_id)
+        zone_list = Zone.objects.filter(is_active=True,city_id=city_id)
+        zone_list = zone_list.exclude(id__in=[zone_id,])
+    else:
+        zone_list = Zone.objects.filter(is_active=True,city_id=city_id)     
     zone_list = zone_list.order_by('sequence_number')
     return zone_list
 
@@ -435,9 +441,12 @@ def get_city_info(city_id=1):
 
 def ajax_polygons(request):
     city_id = request.GET.get('city_id') 
+    type_admin = request.GET.get('type_admin') 
+    action_admin = request.GET.get('action_admin') 
+    action_id_admin = request.GET.get('action_id_admin') 
 
     response_data={}
-    response_data['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
+    response_data['zones_with_boundaries'] = get_zones_with_boundaries(city_id,type_admin,action_admin,action_id_admin)
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 def ajax_location_polygons(request):
@@ -455,10 +464,10 @@ def get_location_with_boundaries(city_id):
     zones_data = []
     for location in locations:
         # Get all boundary points for the zone, ordered by sequence number
-        boundaries = LocationBoundry.objects.filter(location=location).order_by('sequence_number')
+        # boundaries = LocationBoundry.objects.filter(location=location).order_by('sequence_number')
         
         # Format boundary coordinates for the frontend
-        boundary_coords = [{"lat": float(boundary.latitude), "lng": float(boundary.longitude)} for boundary in boundaries]
+        #boundary_coords = [{"lat": float(boundary.latitude), "lng": float(boundary.longitude)} for boundary in boundaries]
         
         # Add zone information and its boundaries
         if location.boundry_color_code:
@@ -484,15 +493,18 @@ def get_location_with_boundaries(city_id):
             "name_color_code":name_color_code,
             "fill_color_code":fill_color_code,
             "boundry_color_code": boundry_color_code,
-            "coords": boundary_coords
+            "coords": location.boundry_json
         })
     
     return zones_data
 
 
-def get_zones_with_boundaries(city_id):
+def get_zones_with_boundaries(city_id,type_admin,action_admin,action_id_admin):
     # Query all active zones
     zones = Zone.objects.filter(is_active=True,city_id=city_id)
+    # if action_admin=="edit" and type_admin=='zone':
+    #     action_id_admin=int(action_id_admin)
+    #     zones=zones.filter(id=action_id_admin)
 
     # Prepare data to be sent in JSON response
     zones_data = []
@@ -785,7 +797,45 @@ def save_map(request):
                             response_data['error'] = True
                             response_data['message'] = "* Invalid JSON format"
                             response_data['class'] = "error"
-                            response_data['errors'] = ""                    
+                            response_data['errors'] = ""  
+           elif action_type=="6":
+                latlongs= request.POST['latlongs']
+                if latlongs:
+                    try:
+                        path_coordinates = json.loads(latlongs)
+                        if path_coordinates:
+                            City_form = LocationForm(data)
+                            if City_form.is_valid():
+                                    city = City_form.save(commit=False)
+                                    city.boundry_json = path_coordinates
+                                  
+                                    
+                                    city.save()
+                                    
+
+                                    response_data['error'] = False
+                                    response_data['message'] = "Location added Successfully"
+                                    response_data['class'] = "success"
+                                    response_data['errors'] = ""
+                            else:
+                                    response_data['error'] = True
+                                    response_data['class'] = 'error'
+                                    response_data['error_type'] = '2'
+                                    response_data['message'] = ""
+                                    response_data['errors'] = City_form.errors
+                        
+                        
+                        else:
+                            response_data['error'] = True
+                            response_data['message'] = "* Draw Location on Map"
+                            response_data['class'] = "error"
+                            response_data['errors'] = ""  
+
+                    except json.JSONDecodeError as e:
+                            response_data['error'] = True
+                            response_data['message'] = "* Invalid JSON format"
+                            response_data['class'] = "error"
+                            response_data['errors'] = ""                                     
            else:
                 latlongs= request.POST['latlongs']
                 if latlongs:
@@ -871,7 +921,10 @@ def get_map_form(request):
         context['map_form'] = ZoneForm() 
     elif action_type=="5":
         title="City Information"
-        context['map_form'] = CityForm()           
+        context['map_form'] = CityForm() 
+    elif action_type=="6":
+        title="Location Information"
+        context['map_form'] = LocationForm()               
     else:
         title="Zone Information"
         context['map_form'] = ZoneForm()       
@@ -885,6 +938,23 @@ def get_map_form(request):
     return render(request, 'front/includes/map_forms.html', context)
 
 
+def zones(request):
+    context = {}
+    if request.user.is_authenticated:
+        context['page_name'] = "Zone List"
+        listing = Zone.objects.all().order_by('zone_name')
+        context['listing'] = listing
+
+       
+        action=request.GET.get('action',"")
+        id=request.GET.get('id',"")
+        record={}
+        if action=='edit' and id :
+           record = Zone.objects.get(id=id)
+        context['record'] = record
+        return render(request, 'front/zones.html', context)
+    else:
+        return redirect("/")
 
 
 def index(request):
@@ -930,15 +1000,25 @@ def index(request):
 def dashboard(request):
     context = {}
     action_type=request.GET.get('action_type',"") 
+    action=request.GET.get('action',"")
+    type=request.GET.get('type',"")
+    id=request.GET.get('id',"")
     if request.user.is_authenticated:
-        context['page_name'] = "dashboard"
-        context['action_type'] = action_type
-        zone_list=get_zone_list()
-        context['zone_list'] = zone_list
         city_id=1
+        context['page_name'] = "dashboard"
+        context['action'] = action
+        context['type'] = type
+        context['action_type'] = action_type
+        context['id'] = id
+        zone_id=""
+        if action=="edit" and type=='zone':
+            zone_id=id
+        zone_list=get_zone_list(city_id,zone_id)
+        #context['zone_list'] = zone_list
+        
         #context['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
         #context['markers'] = get_markers(city_id)
-        context['drone_video_paths'] = get_drone_video_paths(city_id)
+        #context['drone_video_paths'] = get_drone_video_paths(city_id)
         city_info=get_city_info(city_id)
         if city_info is not None:
             context['city_info'] =city_info
@@ -984,89 +1064,89 @@ def location_list(request):
     respone = JsonResponse(data)
     return respone
 
-def saveroute(request):
-    resp = {}
-    if request.method == 'POST':
-        longitudes = request.POST.getlist('longitudes[]')
-        latitudes = request.POST.getlist('latitudes[]')
-        zone = request.POST.get('zone')
-        if zone:
-            if latitudes and longitudes:
-                for index, latitude in enumerate(latitudes):
-                    if latitude and longitudes[index]:
-                        route = ZoneBoundry()
-                        route.zone_id = zone
-                        route.latitude = latitude
-                        route.longitude = longitudes[index]
-                        route.sequence_number = index+1
-                        route.save()
+# def saveroute(request):
+#     resp = {}
+#     if request.method == 'POST':
+#         longitudes = request.POST.getlist('longitudes[]')
+#         latitudes = request.POST.getlist('latitudes[]')
+#         zone = request.POST.get('zone')
+#         if zone:
+#             if latitudes and longitudes:
+#                 for index, latitude in enumerate(latitudes):
+#                     if latitude and longitudes[index]:
+#                         route = ZoneBoundry()
+#                         route.zone_id = zone
+#                         route.latitude = latitude
+#                         route.longitude = longitudes[index]
+#                         route.sequence_number = index+1
+#                         route.save()
 
-                resp['error'] = False
-                resp['message'] = "Zone Boundry added successfully."
-                resp['class'] = "success"
-                respone = JsonResponse(resp, safe=False)
-                return respone
-            else:
-                resp['error'] = True
-                resp['message'] = "Please add marker to the map"
-                resp['class'] = "error"
-                respone = JsonResponse(resp, safe=False)
-                return respone
-        else:
-            resp['error'] = True
-            resp['message'] = "Please select Zone"
-            resp['class'] = "error"
-            respone = JsonResponse(resp, safe=False)
-            return respone
+#                 resp['error'] = False
+#                 resp['message'] = "Zone Boundry added successfully."
+#                 resp['class'] = "success"
+#                 respone = JsonResponse(resp, safe=False)
+#                 return respone
+#             else:
+#                 resp['error'] = True
+#                 resp['message'] = "Please add marker to the map"
+#                 resp['class'] = "error"
+#                 respone = JsonResponse(resp, safe=False)
+#                 return respone
+#         else:
+#             resp['error'] = True
+#             resp['message'] = "Please select Zone"
+#             resp['class'] = "error"
+#             respone = JsonResponse(resp, safe=False)
+#             return respone
 
-    else:
-        resp['error'] = True
-        resp['message'] = "Please fill all required field"
-        resp['class'] = "error"
-        respone = JsonResponse(resp, safe=False)
-        return respone
+#     else:
+#         resp['error'] = True
+#         resp['message'] = "Please fill all required field"
+#         resp['class'] = "error"
+#         respone = JsonResponse(resp, safe=False)
+#         return respone
     
-def savelocationboundry(request):
-    resp = {}
-    if request.method == 'POST':
-        longitudes = request.POST.getlist('longitudes[]')
-        latitudes = request.POST.getlist('latitudes[]')
-        location = request.POST.get('location')
-        if location:
-            if latitudes and longitudes:
-                for index, latitude in enumerate(latitudes):
-                    if latitude and longitudes[index]:
-                        route = LocationBoundry()
-                        route.location_id = location
-                        route.latitude = latitude
-                        route.longitude = longitudes[index]
-                        route.sequence_number = index+1
-                        route.save()
+# def savelocationboundry(request):
+#     resp = {}
+#     if request.method == 'POST':
+#         longitudes = request.POST.getlist('longitudes[]')
+#         latitudes = request.POST.getlist('latitudes[]')
+#         location = request.POST.get('location')
+#         if location:
+#             if latitudes and longitudes:
+#                 for index, latitude in enumerate(latitudes):
+#                     if latitude and longitudes[index]:
+#                         route = LocationBoundry()
+#                         route.location_id = location
+#                         route.latitude = latitude
+#                         route.longitude = longitudes[index]
+#                         route.sequence_number = index+1
+#                         route.save()
 
-                resp['error'] = False
-                resp['message'] = "Location Boundry added successfully."
-                resp['class'] = "success"
-                respone = JsonResponse(resp, safe=False)
-                return respone
-            else:
-                resp['error'] = True
-                resp['message'] = "Please add marker to the map"
-                resp['class'] = "error"
-                respone = JsonResponse(resp, safe=False)
-                return respone
-        else:
-            resp['error'] = True
-            resp['message'] = "Please select Location"
-            resp['class'] = "error"
-            respone = JsonResponse(resp, safe=False)
-            return respone
+#                 resp['error'] = False
+#                 resp['message'] = "Location Boundry added successfully."
+#                 resp['class'] = "success"
+#                 respone = JsonResponse(resp, safe=False)
+#                 return respone
+#             else:
+#                 resp['error'] = True
+#                 resp['message'] = "Please add marker to the map"
+#                 resp['class'] = "error"
+#                 respone = JsonResponse(resp, safe=False)
+#                 return respone
+#         else:
+#             resp['error'] = True
+#             resp['message'] = "Please select Location"
+#             resp['class'] = "error"
+#             respone = JsonResponse(resp, safe=False)
+#             return respone
 
-    else:
-        resp['error'] = True
-        resp['message'] = "Please fill all required field"
-        resp['class'] = "error"
-        respone = JsonResponse(resp, safe=False)
-        return respone    
+#     else:
+#         resp['error'] = True
+#         resp['message'] = "Please fill all required field"
+#         resp['class'] = "error"
+#         respone = JsonResponse(resp, safe=False)
+#         return respone    
     
 def logout_view(request):
     logout(request)

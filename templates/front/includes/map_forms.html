@@ -141,7 +141,29 @@
         <label for="id_map_max_zoom">Map Max Zoom</label>
         {{map_form.map_max_zoom}}
     </div>
+    {% elif action_type == "6" %}
+    <input type="hidden" name="state" value="1" id="id_state">
+    <input type="hidden" name="city" value="1" id="id_city">
+    <input type="hidden" name="zone" value="1" id="id_zone">
 
+
+    <div class="form-group">
+        <label for="id_location_name">Location Name</label>
+        {{map_form.location_name}}
+    </div>
+    <div class="form-group">
+        <label for="id_boundry_color_code">Boundry Color Code (Hex Code)</label>
+        {{map_form.boundry_color_code}}
+    </div>
+    <div class="form-group">
+        <label for="id_fill_color_code">Fill Color Code (Hex Code)</label>
+        {{map_form.fill_color_code}}
+    </div>
+    <div class="form-group">
+        <label for="id_name_color_code">Name Color Code (HEX Code)</label>
+        {{map_form.name_color_code}}
+    </div>
+    
 
     {% else %}
     <input type="hidden" name="state" value="1" id="id_state">

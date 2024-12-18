@@ -1,0 +1,119 @@
+{% extends "front/base.html" %}{% block content %} {% load static %}
+<div class="pxp-content pxp-full-height">
+    <div class="pxp-content-side pxp-content-left pxp-half">
+       
+            
+        <div class="pxp-content-side-wrapper">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Zone</th>
+                                <th>City</th>
+                                <th>State</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        {% if listing%}
+                        <tbody>
+                        {%for list in listing %}
+                            <tr>
+                                <td>{{list.id}}</td>
+                                <td>{{list.zone_name}}</td>
+                                <td>{{list.city.city_name}}</td>
+                                <td>{{list.state.state_name}}</td>
+                                <td>{{list.is_active}}</td>
+                                <td>
+                                    <a href="/zones?action=edit&id={{list.id}}"><button class="btn btn-primary btn-sm">Edit</button></a>
+                                    <!-- <button class="btn btn-danger btn-sm">Delete</button> -->
+                                </td>
+                            </tr>
+                            {%endfor%}
+                           
+                            
+                        </tbody>
+                        {%endif%}
+                    </table>
+                </div>
+            </div>
+       
+    </div>
+    <div class="pxp-map-side pxp-map-right pxp-half">
+        <div id="map"></div>
+    </div>
+</div>
+{% if record %}
+<script>
+    let map;
+    let polygon;
+    $(document).ready(function () {
+        initMapZone();
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+    const windowHeight = window.innerHeight;
+    const div = document.getElementById('map');
+    div.style.height = `${window.innerHeight - 100}px`;
+  });
+  function getPolygonCenter(coords) {
+    var latSum = 0;
+    var lngSum = 0;
+    coords.forEach(function (coord) {
+      latSum += coord.lat;
+      lngSum += coord.lng;
+    });
+    return {
+      lat: latSum / coords.length,
+      lng: lngSum / coords.length
+    };
+  }
+    function initMapZone() {
+      const polygonCoords = {{record.boundry_json|safe}};
+      var polygonCenter = getPolygonCenter(polygonCoords);
+      console.log(polygonCenter);
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: polygonCenter.lat, lng: polygonCenter.lng }, // San Francisco
+        zoom: 13,
+      });
+
+      // Define the polygon's initial coordinates
+      
+
+      // Create the polygon
+      polygon = new google.maps.Polygon({
+        paths: polygonCoords,
+        editable: true, // Make the polygon editable
+        draggable: false, // Allow dragging
+        strokeColor: "#008000",
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: "#008000",
+        fillOpacity: 0.35,
+      });
+
+      // Add the polygon to the map
+      polygon.setMap(map);
+
+      // Add event listeners to log the polygon's coordinates
+      google.maps.event.addListener(polygon.getPath(), "set_at", logPolygonCoords);
+      google.maps.event.addListener(polygon.getPath(), "insert_at", logPolygonCoords);
+
+      logPolygonCoords(); // Log the initial coordinates
+    }
+
+    // Function to log the polygon's coordinates
+    function logPolygonCoords() {
+      const path = polygon.getPath();
+      const coordinates = [];
+
+      for (let i = 0; i < path.getLength(); i++) {
+        const latLng = path.getAt(i);
+        coordinates.push({ lat: latLng.lat(), lng: latLng.lng() });
+      }
+
+      console.log("Polygon Coordinates:", coordinates);
+    }
+  </script>
+ {%endif%}
+{% endblock %}

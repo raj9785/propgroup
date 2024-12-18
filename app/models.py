@@ -111,16 +111,16 @@ class Zone(models.Model):
     def __str__(self):
         return self.zone_name
     
-class ZoneBoundry(models.Model):
-    zone = models.ForeignKey(
-        Zone, on_delete=models.CASCADE, null=True, blank=False, related_name='zones')
-    latitude = models.CharField(max_length=20, null=True, blank=False)
-    longitude = models.CharField(max_length=20, null=True, blank=False)
-    sequence_number = models.IntegerField(blank=False, default=1, null=True)
-    class Meta:
-        verbose_name = "Zone Boundry"
-        verbose_name_plural = "Zone Boundries"
-        unique_together = ('zone','latitude','longitude')
+# class ZoneBoundry(models.Model):
+#     zone = models.ForeignKey(
+#         Zone, on_delete=models.CASCADE, null=True, blank=False, related_name='zones')
+#     latitude = models.CharField(max_length=20, null=True, blank=False)
+#     longitude = models.CharField(max_length=20, null=True, blank=False)
+#     sequence_number = models.IntegerField(blank=False, default=1, null=True)
+#     class Meta:
+#         verbose_name = "Zone Boundry"
+#         verbose_name_plural = "Zone Boundries"
+#         unique_together = ('zone','latitude','longitude')
 
 
 class Location(models.Model):
@@ -153,16 +153,16 @@ class Location(models.Model):
         return self.location_name
         
 
-class LocationBoundry(models.Model):
-    location = models.ForeignKey(
-        Location, on_delete=models.CASCADE, null=True, blank=False, related_name='locations')
-    latitude = models.CharField(max_length=20, null=True, blank=False)
-    longitude = models.CharField(max_length=20, null=True, blank=False)
-    sequence_number = models.IntegerField(blank=False, default=1, null=True)
-    class Meta:
-        verbose_name = "Location Boundry"
-        verbose_name_plural = "Location Boundries"
-        unique_together = ('location','latitude','longitude')
+# class LocationBoundry(models.Model):
+#     location = models.ForeignKey(
+#         Location, on_delete=models.CASCADE, null=True, blank=False, related_name='locations')
+#     latitude = models.CharField(max_length=20, null=True, blank=False)
+#     longitude = models.CharField(max_length=20, null=True, blank=False)
+#     sequence_number = models.IntegerField(blank=False, default=1, null=True)
+#     class Meta:
+#         verbose_name = "Location Boundry"
+#         verbose_name_plural = "Location Boundries"
+#         unique_together = ('location','latitude','longitude')
 
 
 class MobileOtp(models.Model):
