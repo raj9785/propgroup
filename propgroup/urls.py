@@ -50,7 +50,11 @@ urlpatterns = [
     path('save_map', views.save_map, name="save_map"),
     path('find_zone', views.find_zone, name="find_zone"),
     path('zones', views.zones, name="zones"),
+    path('ajax_update_polygons', views.ajax_update_polygons, name="ajax_update_polygons"),
+    path('city', views.city, name="city"),
+    path('ajax_update_city', views.ajax_update_city, name="ajax_update_city"),
+    path('ajax_select_city', views.ajax_select_city, name="ajax_select_city"),
     path('logout', views.logout_view, name = 'logout'), 
-] 
+]  
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -44,6 +44,28 @@
     <script src="{% static 'front/js/markerclusterer.js' %}"></script>
     <script src="{% static 'front/js/main.js' %}?v=127"></script>
     <script src="{% static 'front/js/map.js' %}?asldksjd"></script>
+
+    <script>
+       $(document).ready(function () {
+        $(".choose_city").on("click", function () {
+            var city_id=$(this).attr("city_id");
+            $.ajax({
+                url: "{% url 'ajax_select_city' %}",
+                type: "get",
+                dataType: "json",
+                data: {
+                    "city_id": city_id
+                },
+                beforeSend: function () {
+
+                },
+                success: function (data) {
+                    window.location.reload();
+                },
+                });
+            });
+       });
+    </script>    
 </body>
 
 </html>

@@ -44,6 +44,9 @@
                                 <a href="#" onclick="take_action('4')">Add Zone</a>
                             </li>
                             <li>
+                                <a href="/city">City Listing</a>
+                            </li>
+                            <li>
                                 <a href="#" onclick="take_action('5')">Add City</a>
                             </li>
                             <li>
@@ -62,9 +65,19 @@
                         </ul> -->
                     </li>
 
-                    </li>
+                    
                     <li class="list-inline-item pxp-is-last"><a href="#">Contact Us</a></li>
-
+                     
+                    {%if city_listing %}
+                    <li class="list-inline-item">
+                        <a href="#">City</a>
+                        <ul class="pxp-nav-sub rounded-lg">
+                            {% for city in city_listing %}
+                            <li><a href="#" class="choose_city" city_id="{{city.id}}" >{{city.city_name}}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endif %}
 
                     {% if user.is_authenticated %}
                     <li class="list-inline-item pxp-is-last"><a href={% url 'logout' %}>Logout</a></li>

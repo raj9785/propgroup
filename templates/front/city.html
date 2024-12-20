@@ -9,7 +9,6 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
-                                <th>Zone</th>
                                 <th>City</th>
                                 <th>State</th>
                                 <th>Status</th>
@@ -21,12 +20,11 @@
                         {%for list in listing %}
                             <tr>
                                 <td>{{list.id}}</td>
-                                <td>{{list.zone_name}}</td>
-                                <td>{{list.city.city_name}}</td>
+                                <td>{{list.city_name}}</td>
                                 <td>{{list.state.state_name}}</td>
                                 <td>{{list.is_active}}</td>
                                 <td>
-                                    <a href="/zones?action=edit&id={{list.id}}"><button class="btn btn-primary btn-sm">Edit</button></a>
+                                    <a href="/city?action=edit&id={{list.id}}"><button class="btn btn-primary btn-sm">Edit</button></a>
                                     <!-- <button class="btn btn-danger btn-sm">Delete</button> -->
                                 </td>
                             </tr>
@@ -74,7 +72,7 @@
       console.log(polygonCenter);
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: polygonCenter.lat, lng: polygonCenter.lng }, // San Francisco
-        zoom: 13,
+        zoom: 11,
         minZoom: 11,           // Minimum zoom level allowed
         maxZoom: 20,          // Maximum zoom level allowed
       });
@@ -117,7 +115,7 @@
       console.log("Polygon Coordinates:", coordinates);
 
             $.ajax({
-            url: "{% url 'ajax_update_polygons' %}",
+            url: "{% url 'ajax_update_city' %}",
             type: "POST",
             data: {
                 "id": "{{record.id}}",

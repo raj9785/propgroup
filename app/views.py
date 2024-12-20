@@ -937,11 +937,60 @@ def get_map_form(request):
 
     return render(request, 'front/includes/map_forms.html', context)
 
+def ajax_update_polygons(request):
+    response_data = {}
+    if request.user.is_authenticated:
+        id = request.POST.get('id')
+        boundry_json = request.POST.get('boundry_json')
+        boundry_json = json.loads(boundry_json)
+        zone = Zone.objects.get(id=id)        
+        zone.boundry_json=boundry_json
+        zone.save()
+        response_data['error'] = False
+        response_data['message'] = "Zone updated successfully"
+        response_data['class'] = "success"
+        response_data['errors'] = ""
+    else:
+        response_data['error'] = True
+        response_data['message'] = "* Access not allowed"
+        response_data['class'] = "error"
+        response_data['errors'] = ""
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def ajax_update_city(request):
+    response_data = {}
+    if request.user.is_authenticated:
+        id = request.POST.get('id')
+        boundry_json = request.POST.get('boundry_json')
+        boundry_json = json.loads(boundry_json)
+        city = City.objects.get(id=id)        
+        city.boundry_json=boundry_json
+        city.save()
+        response_data['error'] = False
+        response_data['message'] = "City updated successfully"
+        response_data['class'] = "success"
+        response_data['errors'] = ""
+    else:
+        response_data['error'] = True
+        response_data['message'] = "* Access not allowed"
+        response_data['class'] = "error"
+        response_data['errors'] = ""
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def city_listing():
+    listing = City.objects.filter(is_active=True).order_by('city_name')
+    return listing
+
 
 def zones(request):
     context = {}
     if request.user.is_authenticated:
         context['page_name'] = "Zone List"
+        context['city_listing'] = city_listing()
         listing = Zone.objects.all().order_by('zone_name')
         context['listing'] = listing
 
@@ -955,14 +1004,35 @@ def zones(request):
         return render(request, 'front/zones.html', context)
     else:
         return redirect("/")
+    
+def city(request):
+    context = {}
+    if request.user.is_authenticated:
+        context['page_name'] = "City List"
+        context['city_listing'] = city_listing()
+        listing = City.objects.all().order_by('city_name')
+        context['listing'] = listing
+
+       
+        action=request.GET.get('action',"")
+        id=request.GET.get('id',"")
+        record={}
+        if action=='edit' and id :
+           record = City.objects.get(id=id)
+        context['record'] = record
+        return render(request, 'front/city.html', context)
+    else:
+        return redirect("/")    
 
 
 def index(request):
     context = {}
     context['page_name'] = "home"
-    zone_list=get_zone_list()
+    city_id = request.session.get('city_id', 1)
+    zone_list=get_zone_list(city_id)
     context['zone_list'] = zone_list
-    city_id=1
+    context['city_listing'] = city_listing()
+    
     #context['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
     #context['markers'] = get_markers(city_id)
     context['drone_video_paths'] = get_drone_video_paths(city_id)
@@ -997,6 +1067,17 @@ def index(request):
 
     return render(request, 'front/home.html', context)
 
+def ajax_select_city(request):
+    response_data={}
+    city_id=request.GET.get('city_id',"")
+    request.session['city_id'] = city_id
+    response_data['error'] = True
+    response_data['message'] = "* Updated"
+    response_data['class'] = "error"
+    response_data['errors'] = ""
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
 def dashboard(request):
     context = {}
     action_type=request.GET.get('action_type',"") 
@@ -1004,8 +1085,9 @@ def dashboard(request):
     type=request.GET.get('type',"")
     id=request.GET.get('id',"")
     if request.user.is_authenticated:
-        city_id=1
+        city_id = request.session.get('city_id', 1)
         context['page_name'] = "dashboard"
+        context['city_listing'] = city_listing()
         context['action'] = action
         context['type'] = type
         context['action_type'] = action_type
@@ -1013,7 +1095,7 @@ def dashboard(request):
         zone_id=""
         if action=="edit" and type=='zone':
             zone_id=id
-        zone_list=get_zone_list(city_id,zone_id)
+        #zone_list=get_zone_list(city_id,zone_id)
         #context['zone_list'] = zone_list
         
         #context['zones_with_boundaries'] = get_zones_with_boundaries(city_id)
