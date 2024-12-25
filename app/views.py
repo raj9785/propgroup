@@ -985,14 +985,87 @@ def city_listing():
     listing = City.objects.filter(is_active=True).order_by('city_name')
     return listing
 
+def update_zone(request):
+    response_data = {}
+    if request.user.is_authenticated:
+        id = request.POST.get('id')
+        id=int(id)
+        zone_instance = get_object_or_404(Zone, pk=id)
+        
+
+        Zone_form = ZoneForm(request.POST, instance=zone_instance)
+        if Zone_form.is_valid():
+            zone = Zone_form.save(commit=False)
+            zone.save()
+            
+
+            response_data['error'] = False
+            response_data['message'] = "Zone updated Successfully"
+            response_data['class'] = "success"
+            response_data['errors'] = ""
+        else:
+                response_data['error'] = True
+                response_data['class'] = 'error'
+                response_data['error_type'] = '2'
+                response_data['message'] = ""
+                response_data['errors'] = Zone_form.errors
+
+    else:
+        response_data['error'] = True
+        response_data['message'] = "* Access not allowed"
+        response_data['class'] = "error"
+        response_data['errors'] = ""
+    return HttpResponse(json.dumps(response_data), content_type="application/json")    
+
+
+def update_city(request):
+    response_data = {}
+    if request.user.is_authenticated:
+        id = request.POST.get('id')
+        id=int(id)
+        city_instance = get_object_or_404(City, pk=id)
+        
+
+        City_form = CityForm(request.POST, instance=city_instance)
+        if City_form.is_valid():
+            city = City_form.save(commit=False)
+            city.save()
+            
+
+            response_data['error'] = False
+            response_data['message'] = "City updated Successfully"
+            response_data['class'] = "success"
+            response_data['errors'] = ""
+        else:
+                response_data['error'] = True
+                response_data['class'] = 'error'
+                response_data['error_type'] = '2'
+                response_data['message'] = ""
+                response_data['errors'] = City_form.errors
+
+    else:
+        response_data['error'] = True
+        response_data['message'] = "* Access not allowed"
+        response_data['class'] = "error"
+        response_data['errors'] = ""
+    return HttpResponse(json.dumps(response_data), content_type="application/json") 
+
 
 def zones(request):
     context = {}
     if request.user.is_authenticated:
-        context['page_name'] = "Zone List"
+        context['page_name'] = "ZoneList"
         context['city_listing'] = city_listing()
-        listing = Zone.objects.all().order_by('zone_name')
-        context['listing'] = listing
+        city_id = request.session.get('city_id', 1)
+        listing = Zone.objects.filter(city_id=city_id).order_by('zone_name')
+
+        city_info=get_city_info(city_id)
+        if city_info is not None:
+            context['center_latitude'] =city_info.center_latitude
+            context['center_longitude'] =city_info.center_longitude
+           
+        
+        context['map_form'] = ZoneForm()  
 
        
         action=request.GET.get('action',"")
@@ -1000,7 +1073,95 @@ def zones(request):
         record={}
         if action=='edit' and id :
            record = Zone.objects.get(id=id)
+           listing=listing.exclude(id=id)
+           if record.area:
+               area=record.area
+           else:
+               area=""
+           if record.traffic:
+               traffic=record.traffic
+           else:
+               traffic="" 
+
+           if record.population:
+               population=record.population
+           else:
+               population="" 
+
+           if record.name_color_code:
+               name_color_code=record.name_color_code
+           else:
+               name_color_code="#000000"
+
+           if record.zone_color_code:
+               zone_color_code=record.zone_color_code
+           else:
+               zone_color_code="#000000"                       
+
+           record_data = {
+            'zone_name': record.zone_name,
+            'zone_color_code': zone_color_code,
+            'name_color_code': name_color_code,
+            'population': population,
+            'area':area,
+            'traffic': traffic,
+           }
+           context['map_form'] = ZoneForm(record_data) 
+           zone_color_code= record.zone_color_code
+           if zone_color_code:
+               zone_color_code=zone_color_code
+           else:
+               zone_color_code="#008000"    
+           context['zone_color_code'] = zone_color_code          
         context['record'] = record
+        context['id'] = id
+        context['listing'] = listing  
+
+        zones_data = []
+        for zone in listing:
+            if zone.zone_color_code:
+                color_code=zone.zone_color_code
+            else:
+                color_code=""  
+
+            if zone.area:
+               area=zone.area
+            else:
+                area=""
+            if zone.traffic:
+                traffic=zone.traffic
+            else:
+                traffic="" 
+
+            if zone.population:
+                population=zone.population
+            else:
+                population="" 
+
+            if zone.name_color_code:
+                name_color_code=zone.name_color_code
+            else:
+                name_color_code="#000000"
+
+            if zone.zone_color_code:
+                zone_color_code=zone.zone_color_code
+            else:
+                zone_color_code="#000000" 
+
+
+            zones_data.append({
+                "id": str(zone.id),
+                "info": zone.zone_name,
+                "name_color_code":name_color_code,
+                "population":population,
+                "area":area,
+                "traffic":traffic,
+                "color": color_code,
+                "coords": zone.boundry_json,
+            })
+
+        context['zones_data'] = zones_data  
+
         return render(request, 'front/zones.html', context)
     else:
         return redirect("/")
@@ -1008,18 +1169,71 @@ def zones(request):
 def city(request):
     context = {}
     if request.user.is_authenticated:
-        context['page_name'] = "City List"
+        context['page_name'] = "CityList"
         context['city_listing'] = city_listing()
         listing = City.objects.all().order_by('city_name')
-        context['listing'] = listing
+        context['center_latitude'] =28.7041
+        context['center_longitude'] =77.1025
 
        
         action=request.GET.get('action',"")
         id=request.GET.get('id',"")
         record={}
         if action=='edit' and id :
+           listing=listing.exclude(id=id)
            record = City.objects.get(id=id)
+           record_data = {
+            'city_name': record.city_name,
+            'boundry_color_code': record.boundry_color_code,
+            'map_fill_color_code': record.map_fill_color_code,
+            'center_latitude': record.center_latitude,
+            'center_longitude': record.center_longitude,
+            'map_zoom': record.map_zoom,
+            'map_min_zoom': record.map_min_zoom,
+            'map_max_zoom': record.map_max_zoom,
+           }
+           context['map_form'] = CityForm(record_data) 
+           boundry_color_code= record.boundry_color_code
+           if boundry_color_code:
+               boundry_color_code=boundry_color_code
+           else:
+               boundry_color_code="#008000"    
+           context['boundry_color_code'] = boundry_color_code 
+
+           map_fill_color_code= record.map_fill_color_code
+           if map_fill_color_code:
+               map_fill_color_code=map_fill_color_code
+           else:
+               map_fill_color_code=""    
+           context['map_fill_color_code'] = map_fill_color_code
+
+
         context['record'] = record
+        context['id'] = id
+        context['listing'] = listing
+
+        city_data = []
+        for city in listing:
+            if city.boundry_color_code:
+                boundry_color_code=city.boundry_color_code
+            else:
+                boundry_color_code="#000000"
+
+            if city.map_fill_color_code:
+                map_fill_color_code=city.map_fill_color_code
+            else:
+                map_fill_color_code=""
+
+            city_data.append({
+                "id": str(city.id),
+                "info": city.city_name,
+                "map_fill_color_code":map_fill_color_code,
+                "color": boundry_color_code,
+                "coords": city.boundry_json,
+            })
+
+        context['city_data'] = city_data 
+          
         return render(request, 'front/city.html', context)
     else:
         return redirect("/")    

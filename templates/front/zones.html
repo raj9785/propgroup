@@ -1,57 +1,161 @@
 {% extends "front/base.html" %}{% block content %} {% load static %}
 <div class="pxp-content pxp-full-height">
-    <div class="pxp-content-side pxp-content-left pxp-half">
-       
-            
-        <div class="pxp-content-side-wrapper">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>Zone</th>
-                                <th>City</th>
-                                <th>State</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        {% if listing%}
-                        <tbody>
-                        {%for list in listing %}
-                            <tr>
-                                <td>{{list.id}}</td>
-                                <td>{{list.zone_name}}</td>
-                                <td>{{list.city.city_name}}</td>
-                                <td>{{list.state.state_name}}</td>
-                                <td>{{list.is_active}}</td>
-                                <td>
-                                    <a href="/zones?action=edit&id={{list.id}}"><button class="btn btn-primary btn-sm">Edit</button></a>
-                                    <!-- <button class="btn btn-danger btn-sm">Delete</button> -->
-                                </td>
-                            </tr>
-                            {%endfor%}
-                           
-                            
-                        </tbody>
-                        {%endif%}
-                    </table>
-                </div>
-            </div>
-       
+  <div class="pxp-content-side pxp-content-left pxp-half">
+
+
+    <div class="pxp-content-side-wrapper">
+      {% if record %}
+      <div class="table-responsive" style="height: 200px;">
+      {%else%}
+      <div class="table-responsive">
+      {%endif%}
+      
+        <table class="table table-bordered table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Zone</th>
+              <th>City</th>
+              <th>State</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          {% if listing%}
+          <tbody>
+            {%for list in listing %}
+            <tr>
+              <td>{{list.id}}</td>
+              <td>{{list.zone_name}}</td>
+              <td>{{list.city.city_name}}</td>
+              <td>{{list.state.state_name}}</td>
+              <td>{{list.is_active}}</td>
+              <td>
+                <a href="/zones?action=edit&id={{list.id}}"><button class="btn btn-primary btn-sm">Edit</button></a>
+                <!-- <button class="btn btn-danger btn-sm">Delete</button> -->
+              </td>
+            </tr>
+            {%endfor%}
+
+
+          </tbody>
+          {%endif%}
+        </table>
+      </div>
+      {% if id %}
+      <div class="edit_form">
+      <form id="map_form" enctype="multipart/form-data" class="mt-4" action={% url 'update_zone' %} method='POST'>
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{id}}">
+        <div class="form-group">
+        <label for="id_name">Zone Name</label>
+        {{map_form.zone_name}}
+      </div>
+      <div class="form-group">
+        <label for="id_description">Zone Color Code (Hex Code)</label>
+        {{map_form.zone_color_code}}
+      </div>
+      <div class="form-group">
+        <label for="id_name">Name Color Code (HEX Code)</label>
+        {{map_form.name_color_code}}
+      </div>
+      <div class="form-group">
+        <label for="id_name">Population</label>
+        {{map_form.population}}
+      </div>
+      <div class="form-group">
+        <label for="id_name">Area</label>
+        {{map_form.area}}
+      </div>
+      <div class="form-group">
+        <label for="id_name">Traffic</label>
+        {{map_form.traffic}}
+      </div>
+
+      <div class="form-group">
+        <button type="button" class="pxp-agent-contact-modal-btn updatet_map" id="updatet_map">Submit</button>
+
+
+      </div>
+      <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div_map"></span>
+    </form>
     </div>
-    <div class="pxp-map-side pxp-map-right pxp-half">
-        <div id="map"></div>
+    {%endif%}
+
     </div>
+
+  </div>
+  <div class="pxp-map-side pxp-map-right pxp-half">
+    <div id="map"></div>
+  </div>
 </div>
-{% if record %}
+
 <script>
-    let map;
-    let polygon;
-    $(document).ready(function () {
-        initMapZone();
+  let map;
+  let polygon;
+  $(document).ready(function () {
+    initMapZone();
+    
+    $(document).on("click", ".updatet_map", function () {
+      form = document.getElementById("map_form");
+      formdata = new FormData(form);
+      
+
+
+      $.ajax({
+        url: $("#map_form").attr("action"),
+        type: "POST",
+        enctype: "multipart/form-data",
+        data: formdata,
+        dataType: "json",
+        cache: false,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+          $("#updatet_map").html("Wait..");
+          
+        },
+        success: function (data) {
+          var response = "";
+          $("#updatet_map").html(
+            `Submit`
+          );
+          $("#updatet_map").addClass("updatet_map");
+          if (data.error == false) {
+            response +=
+              '<div class="alert alert-success" role="alert">' +
+              data.message +
+              "</div>";
+            
+            $(".msg_div_map").html(response);
+            window.location.reload();
+          } else {
+
+            var resp = data.errors;
+            if (data.message == "") {
+              $.each(resp, function (k, value) {
+                response +=
+                  '<div class="alert alert-danger" role="alert">' +
+                  k +
+                  " : " +
+                  value +
+                  `</div>`;
+              });
+            } else {
+              response +=
+                '<div class="alert alert-danger" role="alert">' +
+                data.message +
+                "</div>";
+            }
+            $(".msg_div_map").html(response);
+
+          }
+        },
+      });
+
     });
-    document.addEventListener("DOMContentLoaded", function () {
+  });
+  document.addEventListener("DOMContentLoaded", function () {
     const windowHeight = window.innerHeight;
     const div = document.getElementById('map');
     div.style.height = `${window.innerHeight - 100}px`;
@@ -68,73 +172,98 @@
       lng: lngSum / coords.length
     };
   }
-    function initMapZone() {
-      const polygonCoords = {{record.boundry_json|safe}};
-      var polygonCenter = getPolygonCenter(polygonCoords);
-      console.log(polygonCenter);
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: polygonCenter.lat, lng: polygonCenter.lng }, // San Francisco
-        zoom: 13,
-        minZoom: 11,           // Minimum zoom level allowed
-        maxZoom: 20,          // Maximum zoom level allowed
-      });
+  function initMapZone() {
+    {% if record %}
+    const polygonCoords = {{ record.boundry_json| safe}};
+    var polygonCenter = getPolygonCenter(polygonCoords);
+    center= { lat: polygonCenter.lat, lng: polygonCenter.lng }
+   {%else%}
+   var center = {lat: {{center_latitude}}, lng: {{center_longitude}}};
+   {%endif%}
+  
+  map = new google.maps.Map(document.getElementById("map"), {
+    center:center, // San Francisco
+    zoom: 11,
+    minZoom: 9,           // Minimum zoom level allowed
+    maxZoom: 20,          // Maximum zoom level allowed
+  });
 
-      // Define the polygon's initial coordinates
-      
+  // Define the polygon's initial coordinates
+  {% if record %}
 
-      // Create the polygon
-      polygon = new google.maps.Polygon({
-        paths: polygonCoords,
-        editable: true, // Make the polygon editable
-        draggable: false, // Allow dragging
-        strokeColor: "#008000",
-        strokeOpacity: 0.8,
+  // Create the polygon
+  polygon = new google.maps.Polygon({
+    paths: polygonCoords,
+    editable: true, // Make the polygon editable
+    draggable: false, // Allow dragging
+    strokeColor: "{{zone_color_code}}",
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+    fillColor: "{{zone_color_code}}",
+    fillOpacity: 0.35,
+  });
+
+  // Add the polygon to the map
+  polygon.setMap(map);
+
+  // Add event listeners to log the polygon's coordinates
+  google.maps.event.addListener(polygon.getPath(), "set_at", logPolygonCoords);
+  google.maps.event.addListener(polygon.getPath(), "insert_at", logPolygonCoords);
+
+  logPolygonCoords(); // Log the initial coordinates
+  {%endif%}
+  const polygonsData = {{ zones_data| safe}};
+  polygonsData.forEach((polygonData, index) => {
+      var fillOpacity = polygonData.color ? 0.35 : 0;
+
+
+      var polygon = new google.maps.Polygon({
+        paths: polygonData.coords,
+        strokeColor: polygonData.color,
+        strokeOpacity: 2,
         strokeWeight: 2,
-        fillColor: "#008000",
-        fillOpacity: 0.35,
+        fillColor: polygonData.color,
+        fillOpacity: fillOpacity,
+        clickable: false,
       });
-
-      // Add the polygon to the map
+      // Display the polygon on the map
       polygon.setMap(map);
+    });
 
-      // Add event listeners to log the polygon's coordinates
-      google.maps.event.addListener(polygon.getPath(), "set_at", logPolygonCoords);
-      google.maps.event.addListener(polygon.getPath(), "insert_at", logPolygonCoords);
 
-      logPolygonCoords(); // Log the initial coordinates
+  }
+
+  // Function to log the polygon's coordinates
+  function logPolygonCoords() {
+    const path = polygon.getPath();
+    const coordinates = [];
+
+    for (let i = 0; i < path.getLength(); i++) {
+      const latLng = path.getAt(i);
+      coordinates.push({ lat: latLng.lat(), lng: latLng.lng() });
     }
 
-    // Function to log the polygon's coordinates
-    function logPolygonCoords() {
-      const path = polygon.getPath();
-      const coordinates = [];
+    console.log("Polygon Coordinates:", coordinates);
 
-      for (let i = 0; i < path.getLength(); i++) {
-        const latLng = path.getAt(i);
-        coordinates.push({ lat: latLng.lat(), lng: latLng.lng() });
-      }
+    $.ajax({
+      url: "{% url 'ajax_update_polygons' %}",
+      type: "POST",
+      data: {
+        "id": "{{record.id}}",
+        "boundry_json": JSON.stringify(coordinates),
+        "csrfmiddlewaretoken": "{{ csrf_token }}"
+      },
+      dataType: "json",
+      beforeSend: function () {
 
-      console.log("Polygon Coordinates:", coordinates);
+      },
+      success: function (data) {
 
-            $.ajax({
-            url: "{% url 'ajax_update_polygons' %}",
-            type: "POST",
-            data: {
-                "id": "{{record.id}}",
-                "boundry_json": JSON.stringify(coordinates),
-                "csrfmiddlewaretoken": "{{ csrf_token }}"
-            },
-            dataType: "json",
-            beforeSend: function () {
+        //window.location.reload();
 
-            },
-            success: function (data) {
+      },
+    });
+  }
+</script>
 
-                //window.location.reload();
-
-            },
-            });
-    }
-  </script>
- {%endif%}
 {% endblock %}

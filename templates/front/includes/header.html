@@ -41,16 +41,28 @@
                                 <a href="/zones">Zone Listing</a>
                             </li>
                             <li>
+                                {% if page_name == "dashboard" %}
                                 <a href="#" onclick="take_action('4')">Add Zone</a>
+                                {%else%}
+                                <a href="/dashboard?action_type=4">Add Zone</a>
+                                {% endif %}
                             </li>
                             <li>
                                 <a href="/city">City Listing</a>
                             </li>
                             <li>
+                                {% if page_name == "dashboard" %}
                                 <a href="#" onclick="take_action('5')">Add City</a>
+                                {%else%}
+                                <a href="/dashboard?action_type=5">Add City</a>
+                                {% endif %}
                             </li>
                             <li>
+                                {% if page_name == "dashboard" %}
                                 <a href="#" onclick="take_action('6')">Add Location</a>
+                                {%else%}
+                                <a href="/dashboard?action_type=6">Add Location</a>
+                                {% endif %}
                             </li>
                         </ul>
                     </li>

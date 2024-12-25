@@ -4,7 +4,11 @@
        
             
         <div class="pxp-content-side-wrapper">
-                <div class="table-responsive">
+          {% if record %}
+          <div class="table-responsive" style="height: 200px;">
+          {%else%}
+          <div class="table-responsive">
+          {%endif%}
                     <table class="table table-bordered table-striped table-hover">
                         <thead class="table-dark">
                             <tr>
@@ -35,6 +39,57 @@
                         {%endif%}
                     </table>
                 </div>
+                {% if id %}
+                <div class="edit_form">
+                  <form id="map_form" enctype="multipart/form-data" class="mt-4" action={% url 'update_city' %} method='POST'>
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{id}}">
+                    <div class="form-group">
+                      <label for="id_city_name">City Name</label>
+                      {{map_form.city_name}}
+                  </div>
+                  <div class="form-group">
+                      <label for="id_boundry_color_code">Boundry Color Code</label>
+                      {{map_form.boundry_color_code}}
+                  </div>
+                  <div class="form-group">
+                      <label for="id_map_fill_color_code">Map Fill Color Code</label>
+                      {{map_form.map_fill_color_code}}
+                  </div>
+                  <div class="form-group">
+                      <label for="id_center_latitude">Center Latitude</label>
+                      {{map_form.center_latitude}}
+                  </div>
+                  <div class="form-group">
+                      <label for="id_center_longitude">Center Longitude</label>
+                      {{map_form.center_longitude}}
+                  </div>
+                  <div class="form-group">
+                      <label for="id_map_zoom">Map Zoom</label>
+                      {{map_form.map_zoom}}
+                  </div>
+              
+                  <div class="form-group">
+                      <label for="id_map_min_zoom">Map Min Zoom</label>
+                      {{map_form.map_min_zoom}}
+                  </div>
+              
+                  <div class="form-group">
+                      <label for="id_map_max_zoom">Map Max Zoom</label>
+                      {{map_form.map_max_zoom}}
+                  </div> 
+            
+                  <div class="form-group">
+                    <button type="button" class="pxp-agent-contact-modal-btn updatet_map" id="updatet_map">Submit</button>
+            
+            
+                  </div>
+                  <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div_map"></span>
+                </form>
+                </div>
+
+                {% endif %}
+
             </div>
        
     </div>
@@ -42,12 +97,70 @@
         <div id="map"></div>
     </div>
 </div>
-{% if record %}
+
 <script>
     let map;
     let polygon;
     $(document).ready(function () {
         initMapZone();
+        $(document).on("click", ".updatet_map", function () {
+      form = document.getElementById("map_form");
+      formdata = new FormData(form);
+      
+
+
+      $.ajax({
+        url: $("#map_form").attr("action"),
+        type: "POST",
+        enctype: "multipart/form-data",
+        data: formdata,
+        dataType: "json",
+        cache: false,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+          $("#updatet_map").html("Wait..");
+          
+        },
+        success: function (data) {
+          var response = "";
+          $("#updatet_map").html(
+            `Submit`
+          );
+          $("#updatet_map").addClass("updatet_map");
+          if (data.error == false) {
+            response +=
+              '<div class="alert alert-success" role="alert">' +
+              data.message +
+              "</div>";
+            
+            $(".msg_div_map").html(response);
+            window.location.reload();
+          } else {
+
+            var resp = data.errors;
+            if (data.message == "") {
+              $.each(resp, function (k, value) {
+                response +=
+                  '<div class="alert alert-danger" role="alert">' +
+                  k +
+                  " : " +
+                  value +
+                  `</div>`;
+              });
+            } else {
+              response +=
+                '<div class="alert alert-danger" role="alert">' +
+                data.message +
+                "</div>";
+            }
+            $(".msg_div_map").html(response);
+
+          }
+        },
+      });
+
+    });
     });
     document.addEventListener("DOMContentLoaded", function () {
     const windowHeight = window.innerHeight;
@@ -67,29 +180,44 @@
     };
   }
     function initMapZone() {
+      {% if record %}
       const polygonCoords = {{record.boundry_json|safe}};
       var polygonCenter = getPolygonCenter(polygonCoords);
-      console.log(polygonCenter);
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: polygonCenter.lat, lng: polygonCenter.lng }, // San Francisco
-        zoom: 11,
-        minZoom: 11,           // Minimum zoom level allowed
-        maxZoom: 20,          // Maximum zoom level allowed
+        zoom: parseInt("{{record.map_zoom}}"),
+        minZoom:parseInt("{{record.map_min_zoom}}"),          // Minimum zoom level allowed
+        maxZoom: parseInt("{{record.map_max_zoom}}"),         // Maximum zoom level allowed
       });
+      {%else%}
+     var center = {lat: {{center_latitude}}, lng: {{center_longitude}}};
+     map = new google.maps.Map(document.getElementById("map"), {
+        center: center, // San Francisco
+        zoom:8,
+        minZoom:5,          // Minimum zoom level allowed
+        maxZoom: 20,         // Maximum zoom level allowed
+      });
+    {%endif%}
+     
 
       // Define the polygon's initial coordinates
-      
-
+      {% if record %} 
+      map_fill_color_code="{{map_fill_color_code}}";
+      if(map_fill_color_code){
+        fillOpacity=0.35;
+      }else{
+        fillOpacity=0;
+      }
       // Create the polygon
       polygon = new google.maps.Polygon({
         paths: polygonCoords,
         editable: true, // Make the polygon editable
         draggable: false, // Allow dragging
-        strokeColor: "#008000",
+        strokeColor: "{{boundry_color_code}}",
         strokeOpacity: 0.8,
         strokeWeight: 2,
-        fillColor: "#008000",
-        fillOpacity: 0.35,
+        fillColor: "{{map_fill_color_code}}",
+        fillOpacity: fillOpacity,
       });
 
       // Add the polygon to the map
@@ -100,6 +228,25 @@
       google.maps.event.addListener(polygon.getPath(), "insert_at", logPolygonCoords);
 
       logPolygonCoords(); // Log the initial coordinates
+      {%endif%}
+
+      const polygonsData = {{ city_data| safe}};
+      polygonsData.forEach((polygonData, index) => {
+      var fillOpacity = polygonData.map_fill_color_code ? 0.35 : 0;
+
+
+      var polygon = new google.maps.Polygon({
+        paths: polygonData.coords,
+        strokeColor: polygonData.color,
+        strokeOpacity: 2,
+        strokeWeight: 2,
+        fillColor: polygonData.map_fill_color_code,
+        fillOpacity: fillOpacity,
+        clickable: false,
+      });
+      // Display the polygon on the map
+      polygon.setMap(map);
+    });
     }
 
     // Function to log the polygon's coordinates
@@ -134,5 +281,5 @@
             });
     }
   </script>
- {%endif%}
+
 {% endblock %}
