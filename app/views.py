@@ -1276,11 +1276,17 @@ def drones(request):
     if request.user.is_authenticated:
         context['page_name'] = "dronesList"
         context['city_listing'] = city_listing()
-        listing = DroneVideo.objects.all().order_by('id')
-        context['center_latitude'] =28.7041
-        context['center_longitude'] =77.1025
+        city_id = request.session.get('city_id', 1)
+        listing = DroneVideo.objects.filter(city_id=city_id).order_by('id')
+        
+        
 
-       
+        city_info=get_city_info(city_id)
+        if city_info is not None:
+            context['center_latitude'] =city_info.center_latitude
+            context['center_longitude'] =city_info.center_longitude
+
+        context['city_info'] = city_info
         action=request.GET.get('action',"")
         id=request.GET.get('id',"")
         record={}

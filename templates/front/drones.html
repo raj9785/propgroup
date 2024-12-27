@@ -169,9 +169,9 @@
      var center = {lat: parseFloat("{{center_latitude}}"), lng: parseFloat("{{center_longitude}}")};
      map = new google.maps.Map(document.getElementById("map"), {
         center: center, // San Francisco
-        zoom:8,
-        minZoom:5,          // Minimum zoom level allowed
-        maxZoom: 20,         // Maximum zoom level allowed
+        zoom:parseInt("{{city_info.map_zoom}}"),
+        minZoom:parseInt("{{city_info.map_min_zoom}}"),          // Minimum zoom level allowed
+        maxZoom: parseInt("{{city_info.map_max_zoom}}"),         // Maximum zoom level allowed
       });
       let pathData_color = "#008000";
      
