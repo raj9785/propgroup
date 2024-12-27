@@ -1,0 +1,265 @@
+{% extends "front/base.html" %}{% block content %} {% load static %}
+<div class="pxp-content pxp-full-height">
+    <div class="pxp-content-side pxp-content-left pxp-half">
+       
+            
+        <div class="pxp-content-side-wrapper">
+          {% if record %}
+          <div class="table-responsive" style="height: 200px;">
+          {%else%}
+          <div class="table-responsive">
+          {%endif%}
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Video</th>
+                                <th>Title</th>
+                                <!-- <th>City</th>
+                                <th>State</th> -->
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        {% if listing%}
+                        <tbody>
+                        {%for list in listing %}
+                            <tr>
+                                <td>{{list.id}}</td>
+                                <td>{{list.video_url}}</td>
+                                <td>{{list.title}}</td>
+                                <!-- <td>{{list.city.city_name}}</td>
+                                <td>{{list.state.state_name}}</td> -->
+                                <td>{{list.is_active}}</td>
+                                <td>
+                                    <a href="/drones?action=edit&id={{list.id}}"><button class="btn btn-primary btn-sm">Edit</button></a>
+                                    <!-- <button class="btn btn-danger btn-sm">Delete</button> -->
+                                </td>
+                            </tr>
+                            {%endfor%}
+                           
+                            
+                        </tbody>
+                        {%endif%}
+                    </table>
+                </div>
+                {% if id %}
+                <div class="edit_form">
+                  <form id="map_form" enctype="multipart/form-data" class="mt-4" action={% url 'update_drone' %} method='POST'>
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{id}}">
+                    <div class="form-group">
+                      <label for="id_city_name">Title</label>
+                      {{map_form.title}}
+                  </div>
+                  <div class="form-group">
+                      <label for="id_video_url">Video url</label>
+                      {{map_form.video_url}}
+                  </div>
+                  <div class="form-group">
+                      <label for="id_description">Description</label>
+                      {{map_form.description}}
+                  </div>
+                  
+              
+                
+            
+                  <div class="form-group">
+                    <button type="button" class="pxp-agent-contact-modal-btn updatet_map" id="updatet_map">Submit</button>
+            
+            
+                  </div>
+                  <span style="width: 100%; text-align: center;margin-top: 5px;" class="msg_div_map"></span>
+                </form>
+                </div>
+
+                {% endif %}
+
+            </div>
+       
+    </div>
+    <div class="pxp-map-side pxp-map-right pxp-half">
+        <div id="map"></div>
+    </div>
+</div>
+
+<script>
+    let map;
+    let polygon;
+    $(document).ready(function () {
+    initMapZone();
+    $(document).on("click", ".updatet_map", function () {
+      form = document.getElementById("map_form");
+      formdata = new FormData(form);
+      
+
+
+      $.ajax({
+        url: $("#map_form").attr("action"),
+        type: "POST",
+        enctype: "multipart/form-data",
+        data: formdata,
+        dataType: "json",
+        cache: false,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+          $("#updatet_map").html("Wait..");
+          
+        },
+        success: function (data) {
+          var response = "";
+          $("#updatet_map").html(
+            `Submit`
+          );
+          $("#updatet_map").addClass("updatet_map");
+          if (data.error == false) {
+            response +=
+              '<div class="alert alert-success" role="alert">' +
+              data.message +
+              "</div>";
+            
+            $(".msg_div_map").html(response);
+            window.location.reload();
+          } else {
+
+            var resp = data.errors;
+            if (data.message == "") {
+              $.each(resp, function (k, value) {
+                response +=
+                  '<div class="alert alert-danger" role="alert">' +
+                  k +
+                  " : " +
+                  value +
+                  `</div>`;
+              });
+            } else {
+              response +=
+                '<div class="alert alert-danger" role="alert">' +
+                data.message +
+                "</div>";
+            }
+            $(".msg_div_map").html(response);
+
+          }
+        },
+      });
+
+    });
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+    const windowHeight = window.innerHeight;
+    const div = document.getElementById('map');
+    div.style.height = `${window.innerHeight - 100}px`;
+  });
+  function getPolygonCenter(coords) {
+    var latSum = 0;
+    var lngSum = 0;
+    coords.forEach(function (coord) {
+      latSum += coord.lat;
+      lngSum += coord.lng;
+    });
+    return {
+      lat: latSum / coords.length,
+      lng: lngSum / coords.length
+    };
+  }
+    function initMapZone() {
+      
+     var center = {lat: parseFloat("{{center_latitude}}"), lng: parseFloat("{{center_longitude}}")};
+     map = new google.maps.Map(document.getElementById("map"), {
+        center: center, // San Francisco
+        zoom:8,
+        minZoom:5,          // Minimum zoom level allowed
+        maxZoom: 20,         // Maximum zoom level allowed
+      });
+      let pathData_color = "#008000";
+     
+      var paths = {{drone_data|safe}};
+        paths.forEach((pathData, index) => {
+          var pathPolyline = new google.maps.Polyline({
+            path: pathData.coordinates,
+            strokeColor: pathData_color,//pathData.color,
+            strokeOpacity: 1,
+            strokeWeight: 3,
+            icons: [
+              {
+                // icon: {
+                //   path: google.maps.SymbolPath.CIRCLE,
+                //   scale: 3,
+                //   fillColor: pathData_color,
+                //   fillOpacity: 1,
+                //   strokeWeight: 0,
+                // },
+                // icon: {
+                //   url: "{% static 'front/images/camera.png' %}", // Replace with the path to your image
+                //   scaledSize: new google.maps.Size(20, 20), // Adjust icon size
+                //   anchor: new google.maps.Point(10, 10), // Center the icon
+                // },
+                offset: "0",
+                repeat: "7px",
+              },
+            ],
+            zIndex: 2099,
+          });
+
+          // Display the polyline on the map
+          pathPolyline.setMap(map);
+          var drone_path = pathData.coordinates;
+          drone_path.forEach(function (markerData, index) {
+            if (index === 0) {
+              // First marker
+              iconUrl = "{% static 'front/images/first_drone.png' %}";
+            } else if (index === drone_path.length - 1) {
+              // Last marker
+              iconUrl = "{% static 'front/images/last_drone.png' %}";
+            } else {
+              // Middle markers
+              iconUrl = "{% static 'front/images/drone.png' %}";
+            }
+
+            var drone = new google.maps.Marker({
+              position: { lat: markerData.lat, lng: markerData.lng },
+              map: map,
+              icon: {
+                url: iconUrl, // URL to the custom icon image
+                scaledSize: new google.maps.Size(12, 12), // Scale the icon to desired size
+                origin: new google.maps.Point(0, 0), // Origin point of the icon
+                anchor: new google.maps.Point(5, 5) // Anchor point of the icon (centered)
+              }
+            });
+          });
+
+          // Add mouseover event for each polyline
+          google.maps.event.addListener(pathPolyline, 'mouseover', function (event) {
+            document.getElementById("customInfoWindow").style.display = "block";
+            // document.getElementById("video_container").innerHTML = pathData.html_data;
+            // document.getElementById("video_info").innerHTML = pathData.info;
+            // document.getElementById("video_title").innerHTML = pathData.title;
+            $("#dynamic_content").html(pathData.html_data);
+          });
+
+          google.maps.event.addListener(pathPolyline, 'click', function (event) {
+            document.getElementById("customInfoWindow").style.display = "block";
+            // document.getElementById("video_container").innerHTML = pathData.html_data;
+            // document.getElementById("video_info").innerHTML = pathData.info;
+            // document.getElementById("video_title").innerHTML = pathData.title;
+            $("#dynamic_content").html(pathData.html_data);
+          });
+
+          // Add mouseout event to hide the info window when the mouse leaves the polyline
+          google.maps.event.addListener(pathPolyline, 'mouseout', function () {
+            //document.getElementById("customInfoWindow").style.display = "none";
+          });
+        });
+     
+
+   
+
+      
+    }
+
+   
+  </script>
+
+{% endblock %}

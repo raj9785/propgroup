@@ -56,6 +56,8 @@ urlpatterns = [
     path('ajax_select_city', views.ajax_select_city, name="ajax_select_city"),
     path('update_zone', views.update_zone, name="update_zone"),
     path('update_city', views.update_city, name="update_city"),
+    path('drones', views.drones, name="drones"),
+    path('update_drone', views.update_drone, name="update_drone"),
     path('logout', views.logout_view, name = 'logout'), 
 ]  
 if settings.DEBUG:

@@ -959,6 +959,7 @@ def ajax_update_polygons(request):
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
+
 def ajax_update_city(request):
     response_data = {}
     if request.user.is_authenticated:
@@ -1016,6 +1017,38 @@ def update_zone(request):
         response_data['class'] = "error"
         response_data['errors'] = ""
     return HttpResponse(json.dumps(response_data), content_type="application/json")    
+
+def update_drone(request):
+    response_data = {}
+    if request.user.is_authenticated:
+        id = request.POST.get('id')
+        id=int(id)
+        droney_instance = get_object_or_404(DroneVideo, pk=id)
+        
+
+        Drone_form = DroneVideoForm(request.POST, instance=droney_instance)
+        if Drone_form.is_valid():
+            city = Drone_form.save(commit=False)
+            city.save()
+            
+
+            response_data['error'] = False
+            response_data['message'] = "Drone Video updated Successfully"
+            response_data['class'] = "success"
+            response_data['errors'] = ""
+        else:
+                response_data['error'] = True
+                response_data['class'] = 'error'
+                response_data['error_type'] = '2'
+                response_data['message'] = ""
+                response_data['errors'] = Drone_form.errors
+
+    else:
+        response_data['error'] = True
+        response_data['message'] = "* Access not allowed"
+        response_data['class'] = "error"
+        response_data['errors'] = ""
+    return HttpResponse(json.dumps(response_data), content_type="application/json") 
 
 
 def update_city(request):
@@ -1237,6 +1270,73 @@ def city(request):
         return render(request, 'front/city.html', context)
     else:
         return redirect("/")    
+
+def drones(request):
+    context = {}
+    if request.user.is_authenticated:
+        context['page_name'] = "dronesList"
+        context['city_listing'] = city_listing()
+        listing = DroneVideo.objects.all().order_by('id')
+        context['center_latitude'] =28.7041
+        context['center_longitude'] =77.1025
+
+       
+        action=request.GET.get('action',"")
+        id=request.GET.get('id',"")
+        record={}
+        if action=='edit' and id :
+           listing=listing.exclude(id=id)
+           record = DroneVideo.objects.get(id=id)
+           record_data = {
+            'title': record.title,
+            'video_url': record.video_url,
+            'description': record.description,
+           }
+           context['map_form'] = DroneVideoForm(record_data) 
+          
+
+
+        context['record'] = record
+        context['id'] = id
+        context['listing'] = listing
+
+        context['record'] = record
+        context['id'] = id
+        context['listing'] = listing
+
+        drone_data = []
+        video_list=""
+        for drone in listing:
+            if drone.path_color_code:
+               color_code=drone.path_color_code
+            else:
+                color_code="" 
+            if drone.video_url :    
+                video_id = get_youtube_video_id(drone.video_url)
+                html_data='<iframe src="https://www.youtube.com/embed/'+video_id+'?autoplay=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+                video_list=video_list+'<div class="carousel-item active">'   
+                video_list=video_list+'<div class="video-container" id="video_container">'+html_data+'</div>'
+                video_list=video_list+'<div class="" id="video_title"></div>'
+                video_list=video_list+'</div>'
+            else:
+               video_list="";  
+
+            
+            drone_data.append({
+                "id": str(drone.id),
+                "info": drone.description,
+                "title": drone.title,
+                "color": color_code,
+                "html_data":video_list,
+                "coordinates": drone.path_json,
+            })
+
+        context['drone_data'] = drone_data 
+          
+        return render(request, 'front/drones.html', context)
+    else:
+        return redirect("/")    
+
 
 
 def index(request):
