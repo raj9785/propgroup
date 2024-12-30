@@ -18,7 +18,7 @@
     border: 0;
   }
 </style>
-<div class="pxp-content pxp-full-height">
+<div class="pxp-content pxp-full-height home">
   <div class="pxp-map-side pxp-map-right pxp-half">
 
 
@@ -82,7 +82,7 @@
   </div>
   <div class="pxp-content-side pxp-content-left pxp-half">
     <div class="pxp-content-side-wrapper">
-      <div class="d-flex">
+      <div class="d-none">
         <div class="pxp-content-side-search-form">
           <div class="row pxp-content-side-search-form-row">
             <div class="col-5 col-sm-5 col-md-4 col-lg-3 pxp-content-side-search-form-col">
@@ -102,7 +102,7 @@
           <a role="button" class="pxp-adv-toggle"><span class="fa fa-sliders"></span></a>
         </div>
       </div>
-      <div class="pxp-content-side-search-form-adv mb-3">
+      <div class="pxp-content-side-search-form-adv mb-3 d-none">
         <div class="row pxp-content-side-search-form-row">
           <div class="col-sm-6 col-md-3 pxp-content-side-search-form-col">
             <div class="form-group">
@@ -240,7 +240,7 @@
 
         <a href="#" class="pxp-filter-btn">Apply Filters</a>
       </div>
-      <div class="row pb-4">
+      <div class="row pb-4 d-none">
         <div class="col-sm-6">
           <!-- <h2 class="pxp-content-side-h2">1,684 Results</h2> -->
         </div>
@@ -288,7 +288,51 @@
 
 
 
+
           </a>
+
+          <!-- Thumb-Slider-Element starts -->
+          <div id="thumbSlider" class="carousel slide" data-interval="false">
+            <div class="carousel-inner">
+              <div class="carousel-item active">
+                <div class="row">
+                  <div data-target="#dynamic_content" data-slide-to="0" class="thumb col-sm-4 active">
+                    <img src="https://s14.postimg.cc/z24osq8kt/pixel1.png" alt="XZ">
+                  </div>
+                  <div data-target="#dynamic_content" data-slide-to="1" class="thumb col-sm-4">
+                    <img src="https://s14.postimg.cc/l8gc3onp9/pixel2.png" alt="XZ">
+                  </div>
+                  <div data-target="#dynamic_content" data-slide-to="2" class="thumb col-sm-4">
+                    <img src="https://s14.postimg.cc/8ttk3djcd/pixel5.png" alt="XZ">
+                  </div>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="row">
+                  <div data-target="#dynamic_content" data-slide-to="3" class="thumb col-sm-4">
+                    <img src="https://s14.postimg.cc/4kou178d9/pixel3.png" alt="XZ">
+                  </div>
+                  <div data-target="#dynamic_content" data-slide-to="4" class="thumb col-sm-4">
+                    <img src="https://s14.postimg.cc/almiy9n9t/pixel4.png" alt="XZ">
+                  </div>
+                  <div data-target="#dynamic_content" data-slide-to="5" class="thumb col-sm-4">
+                    <img src="https://s14.postimg.cc/z24osq8kt/pixel1.png" alt="XZ">
+                  </div>
+
+                </div>
+              </div>
+              <a class="carousel-control-prev" href="#thumbSlider" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+              </a>
+              <a class="carousel-control-next" href="#thumbSlider" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+              </a>
+            </div>
+
+          </div>
+          <!-- Thumb-Slider-Element ends -->
         </div>
 
 

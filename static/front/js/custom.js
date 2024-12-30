@@ -35,6 +35,12 @@
             $(leftSide).addClass('w-0p');
             $(rightSide).addClass('w-100p');
         }
-    })
+    });
+
+    $("#thumbSlider .thumb").on("click", function(){
+        $(this).addClass("active");
+        $(this).siblings().removeClass("active");
+    
+    });
 
 })(jQuery);

@@ -3318,6 +3318,9 @@ a.pxp-areas-carousel-item:hover .pxp-areas-carousel-item-fig {
     position: fixed;
 }
 .pxp-content-side-wrapper {
+    padding: 0 10px;
+}
+.pxp-footer.pxp-content-side-wrapper {
     padding: 30px;
 }
 .pxp-content-left {
@@ -3559,7 +3562,8 @@ a.pxp-list-toggle.pxp-active {
 a.pxp-results-card-1 {
     display: block;
     position: relative;
-    height: 340px;
+    /* height: 340px; */
+    height: auto;
     overflow: hidden;
     margin-bottom: 30px;
 }
@@ -3611,6 +3615,7 @@ a.pxp-results-card-1 .carousel-inner > .carousel-item {
     z-index: 4;
     opacity: 1;
     width: 53px;
+    height: 90%;
     -webkit-transition: all .3s ease-in-out;
     -o-transition: all .3s ease-in-out;
     transition: all .3s ease-in-out;
@@ -6363,9 +6368,23 @@ a.pxp-services-tabs-content-item:hover .pxp-services-tabs-content-item-cta {
     .pxp-content-left {
         padding-right: 0;
     }
-    .pxp-map-side.pxp-half {
-        width: 0;
+    .pxp-content.pxp-full-height{
+        flex-direction: column;
     }
+    .pxp-map-side.pxp-half, .pxp-content-side.pxp-content-left.pxp-half {
+        width: 100%;
+    }
+    .pxp-map-side.pxp-map-right{order: 1 !important;}
+    .pxp-content-side.pxp-content-left.pxp-half{
+        /*position: absolute;
+        left: 0;
+        bottom: 0;
+        min-height: unset;
+        z-index: 9;*/
+        order: 2;
+    }
+    a.pxp-results-card-1{margin-bottom: 0;}
+    .left-arrow, .right-arrow{display: none;}
     .pxp-map-side.pxp-max {
         width: 100%;
     }
@@ -6894,6 +6913,9 @@ a.pxp-services-tabs-content-item:hover .pxp-services-tabs-content-item-cta {
         padding: 0 15px;
     }
     .pxp-content-side-wrapper {
+        padding: 0px;
+    }
+    .pxp-footer.pxp-content-side-wrapper {
         padding: 30px 15px;
     }
     a.pxp-list-toggle {
